@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+MAX_BYTES=$((100 * 1024 * 1024))
+failed=0
+
+while IFS= read -r -d '' file; do
+  if [[ -f "$file" ]]; then
+    size=$(wc -c <"$file")
+    if (( size > MAX_BYTES )); then
+      size_mb=$(awk "BEGIN { printf \"%.2f\", $size/1024/1024 }")
+      echo "Blocked: '$file' is ${size_mb}MB (> 100MB)."
+      failed=1
+    fi
+  fi
+done < <(git diff --cached --name-only --diff-filter=AM -z)
+
+if (( failed == 1 )); then
+  echo "Commit rejected: remove large files or use Git LFS."
+  exit 1
+fi
