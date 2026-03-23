@@ -45,24 +45,28 @@ export const heroSideBanners = [
 
 export const featureCards = [
   {
-    title: 'Fasted Delivery',
+    title: 'Fast Delivery',
     description: 'Delivery in 24/H',
-    icon: '/clicon/image/features/package.png'
+    marker: 'SPD',
+    tone: 'teal'
   },
   {
     title: '24 Hours Return',
     description: '100% money-back guarantee',
-    icon: '/clicon/image/features/trophy.png'
+    marker: 'RTN',
+    tone: 'warning'
   },
   {
     title: 'Secure Payment',
     description: 'Your money is safe',
-    icon: '/clicon/image/features/creditcard.png'
+    marker: 'PAY',
+    tone: 'violet'
   },
   {
     title: 'Support 24/7',
     description: 'Live contact/message',
-    icon: '/clicon/image/features/headphones.png'
+    marker: 'SUP',
+    tone: 'primary'
   }
 ];
 

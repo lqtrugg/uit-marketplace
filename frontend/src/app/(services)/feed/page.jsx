@@ -15,7 +15,7 @@ export default function FeedPage() {
 
     async function loadFeed() {
       try {
-        const payload = await requestJson('/api/feed?limit=10');
+        const payload = await requestJson('/api/posts?limit=10');
 
         if (!ignore) {
           setPosts(payload.posts || []);
@@ -43,7 +43,7 @@ export default function FeedPage() {
     setLoadingFeed(true);
 
     try {
-      const payload = await requestJson('/api/feed?limit=10');
+      const payload = await requestJson('/api/posts?limit=10');
       setPosts(payload.posts || []);
       setNextCursor(payload.nextCursor || '');
     } catch (error) {
@@ -66,7 +66,7 @@ export default function FeedPage() {
         before: nextCursor
       });
 
-      const payload = await requestJson(`/api/feed?${query.toString()}`);
+      const payload = await requestJson(`/api/posts?${query.toString()}`);
 
       setPosts((previous) => [...previous, ...(payload.posts || [])]);
       setNextCursor(payload.nextCursor || '');

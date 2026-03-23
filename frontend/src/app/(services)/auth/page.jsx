@@ -1,8 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { GoogleLogin, googleLogout } from '@react-oauth/google';
-import { getErrorMessage, requestJson } from '@/app/_lib/clientApi';
+import { GoogleLogin, GoogleOAuthProvider, googleLogout } from '@react-oauth/google';
+import {
+  clearStoredAuthToken,
+  getErrorMessage,
+  requestJson,
+  setStoredAuthToken
+} from '@/app/_lib/clientApi';
 
 export default function AuthPage() {
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
@@ -16,7 +21,7 @@ export default function AuthPage() {
 
     async function loadSession() {
       try {
-        const payload = await requestJson('/api/auth/session');
+        const payload = await requestJson('/api/sessions/current');
 
         if (!ignore) {
           setCurrentUser(payload.user || null);
@@ -48,11 +53,12 @@ export default function AuthPage() {
     setStatus({ tone: 'info', text: 'Authenticating...' });
 
     try {
-      const payload = await requestJson('/api/auth/google', {
+      const payload = await requestJson('/api/sessions', {
         method: 'POST',
         body: JSON.stringify({ credential: response.credential })
       });
 
+      setStoredAuthToken(payload?.jwt?.token || '');
       setCurrentUser(payload.user);
       setStatus({
         tone: 'success',
@@ -68,11 +74,11 @@ export default function AuthPage() {
 
   async function handleLogout() {
     try {
-      await requestJson('/api/auth/logout', {
-        method: 'POST',
-        body: JSON.stringify({})
+      await requestJson('/api/sessions/current', {
+        method: 'DELETE'
       });
 
+      clearStoredAuthToken();
       googleLogout();
       setCurrentUser(null);
       setStatus({ tone: 'info', text: 'Logged out.' });
@@ -81,7 +87,7 @@ export default function AuthPage() {
     }
   }
 
-  return (
+  const content = (
     <section className="panel">
       <div className="panel-head">
         <h1>Auth Service</h1>
@@ -121,4 +127,10 @@ export default function AuthPage() {
       {status.text ? <p className={`status status-${status.tone}`}>{status.text}</p> : null}
     </section>
   );
+
+  if (!googleClientId) {
+    return content;
+  }
+
+  return <GoogleOAuthProvider clientId={googleClientId}>{content}</GoogleOAuthProvider>;
 }

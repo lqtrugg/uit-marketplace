@@ -1,23 +1,30 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-function ArrowRightIcon({ className = 'size-4' }) {
-  return (
-    <svg className={className} viewBox="0 0 20 20" fill="none" aria-hidden="true">
-      <path d="M3.125 10H16.875" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M11.25 4.375L16.875 10L11.25 15.625" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
+function toneClasses(tone) {
+  if (tone === 'warning') {
+    return 'bg-clicon-warning/20 text-[#8A6900]';
+  }
+
+  if (tone === 'teal') {
+    return 'bg-[#20B2AA]/15 text-[#1A6B66]';
+  }
+
+  if (tone === 'violet') {
+    return 'bg-[#8B5CF6]/15 text-[#5A35A3]';
+  }
+
+  return 'bg-clicon-secondary/15 text-clicon-darkBlue';
 }
 
 export function CtaLink({ href = '#', children, className = '' }) {
   return (
     <Link
       href={href}
-      className={`inline-flex items-center gap-1.5 text-sm font-semibold text-clicon-primary transition hover:text-clicon-darkBlue ${className}`}
+      className={`inline-flex items-center gap-2 text-sm font-semibold text-clicon-primary transition hover:text-clicon-darkBlue ${className}`}
     >
       <span>{children}</span>
-      <ArrowRightIcon />
+      <span className="text-base leading-none">{'->'}</span>
     </Link>
   );
 }
@@ -28,7 +35,7 @@ export function SectionHeading({ title, actionText = 'Browse All Product', tabs 
       <div className="flex items-center gap-6">
         <h2 className="text-2xl font-semibold tracking-tight text-clicon-slate">{title}</h2>
         {tabs.length ? (
-          <div className="hidden flex-wrap items-center gap-3 xl:flex">
+          <div className="hidden flex-wrap items-center gap-2 xl:flex">
             {tabs.map((tab, index) => (
               <button
                 key={tab}
@@ -36,7 +43,7 @@ export function SectionHeading({ title, actionText = 'Browse All Product', tabs 
                 className={
                   index === 0
                     ? 'rounded-full bg-clicon-secondary/10 px-3 py-1 text-sm font-medium text-clicon-darkBlue'
-                    : 'rounded-full px-3 py-1 text-sm text-clicon-muted transition hover:bg-clicon-surface'
+                    : 'rounded-full border border-transparent px-3 py-1 text-sm text-clicon-muted transition hover:border-clicon-border hover:bg-clicon-surface'
                 }
               >
                 {tab}
@@ -51,10 +58,12 @@ export function SectionHeading({ title, actionText = 'Browse All Product', tabs 
   );
 }
 
-export function FeatureCard({ title, description, icon }) {
+export function FeatureCard({ title, description, marker, tone }) {
   return (
-    <article className="flex items-center gap-3 border-r border-clicon-border px-4 py-2 last:border-r-0 md:px-5">
-      <Image src={icon} alt="" width={36} height={36} className="h-8 w-8 object-contain md:h-9 md:w-9" />
+    <article className="flex items-center gap-3 px-4 py-3 md:px-5">
+      <div className={`grid size-10 place-content-center rounded-xl text-xs font-extrabold uppercase tracking-[0.14em] ${toneClasses(tone)}`}>
+        {marker}
+      </div>
       <div>
         <p className="text-sm font-semibold uppercase tracking-wide text-clicon-slate">{title}</p>
         <p className="text-xs text-clicon-muted md:text-sm">{description}</p>
@@ -65,7 +74,7 @@ export function FeatureCard({ title, description, icon }) {
 
 export function DealProductCard({ title, image, price, oldPrice, badge }) {
   return (
-    <article className="group relative rounded-md border border-clicon-border bg-white p-3 transition hover:border-clicon-secondary/40 hover:shadow-card">
+    <article className="group relative rounded-xl border border-clicon-border bg-white p-3 transition hover:-translate-y-0.5 hover:border-clicon-secondary/40 hover:shadow-card">
       {badge ? (
         <span className="absolute left-3 top-3 rounded bg-clicon-warning px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-clicon-slate">
           {badge}
@@ -87,7 +96,7 @@ export function DealProductCard({ title, image, price, oldPrice, badge }) {
 
 export function GridProductCard({ title, image, price, oldPrice, sold, badge }) {
   return (
-    <article className="group relative rounded-md border border-clicon-border bg-white p-3 transition hover:border-clicon-secondary/40 hover:shadow-card">
+    <article className="group relative rounded-xl border border-clicon-border bg-white p-3 transition hover:-translate-y-0.5 hover:border-clicon-secondary/40 hover:shadow-card">
       {badge ? (
         <span className="absolute left-3 top-3 rounded bg-clicon-secondary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
           {badge}
@@ -112,7 +121,7 @@ export function GridProductCard({ title, image, price, oldPrice, sold, badge }) 
 
 export function CategoryCard({ title, image }) {
   return (
-    <article className="rounded-md border border-clicon-border bg-white p-4 text-center transition hover:border-clicon-secondary/40 hover:shadow-card">
+    <article className="rounded-xl border border-clicon-border bg-white p-4 text-center transition hover:-translate-y-0.5 hover:border-clicon-secondary/40 hover:shadow-card">
       <div className="mx-auto mb-3 flex h-20 w-20 items-center justify-center rounded-full bg-clicon-surface">
         <Image src={image} alt={title} width={56} height={56} className="h-14 w-14 object-contain" />
       </div>
@@ -123,7 +132,7 @@ export function CategoryCard({ title, image }) {
 
 export function MiniProductCard({ title, price, image }) {
   return (
-    <article className="flex items-center gap-3 rounded-md border border-clicon-border bg-white p-3 transition hover:border-clicon-secondary/40 hover:shadow-card">
+    <article className="flex items-center gap-3 rounded-xl border border-clicon-border bg-white p-3 transition hover:-translate-y-0.5 hover:border-clicon-secondary/40 hover:shadow-card">
       <Image src={image} alt={title} width={64} height={64} className="h-14 w-14 object-contain" />
       <div>
         <h3 className="line-clamp-2 text-sm text-clicon-slate">{title}</h3>
@@ -135,8 +144,8 @@ export function MiniProductCard({ title, price, image }) {
 
 export function NewsCard({ author, date, comments, title, text, image }) {
   return (
-    <article className="rounded-md border border-clicon-border bg-white p-4 shadow-sm">
-      <Image src={image} alt={title} width={376} height={248} className="h-52 w-full rounded-md object-cover" />
+    <article className="rounded-xl border border-clicon-border bg-white p-4 shadow-sm">
+      <Image src={image} alt={title} width={376} height={248} className="h-52 w-full rounded-lg object-cover" />
       <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-clicon-muted">
         <span>{author}</span>
         <span>{date}</span>
@@ -148,5 +157,3 @@ export function NewsCard({ author, date, comments, title, text, image }) {
     </article>
   );
 }
-
-export { ArrowRightIcon };

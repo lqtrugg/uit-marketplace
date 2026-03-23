@@ -29,18 +29,15 @@ function PrimaryButton({ children, variant = 'primary' }) {
   const classes =
     variant === 'secondary'
       ? 'bg-clicon-secondary text-white hover:bg-clicon-darkBlue'
-      : 'bg-clicon-primary text-white hover:bg-clicon-primary/90';
+      : 'bg-clicon-primary text-white hover:bg-clicon-secondary';
 
   return (
     <button
       type="button"
-      className={`inline-flex items-center gap-2 rounded-sm px-4 py-3 text-sm font-semibold uppercase tracking-wide transition ${classes}`}
+      className={`inline-flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold uppercase tracking-wide transition ${classes}`}
     >
       {children}
-      <svg className="size-4" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-        <path d="M3.125 10H16.875" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M11.25 4.375L16.875 10L11.25 15.625" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
+      <span className="text-base leading-none">{'->'}</span>
     </button>
   );
 }
@@ -48,7 +45,8 @@ function PrimaryButton({ children, variant = 'primary' }) {
 function HeroSection() {
   return (
     <section className="app-container grid gap-6 pt-6 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-      <article className="rounded-md bg-[#F2F4F5] p-6 sm:p-10">
+      <article className="relative overflow-hidden rounded-2xl border border-[#DDE4ED] bg-gradient-to-br from-[#EEF6FF] via-[#F6FAFF] to-[#F3F7FB] p-6 sm:p-10">
+        <div className="pointer-events-none absolute -right-12 -top-16 h-56 w-56 rounded-full bg-clicon-secondary/10 blur-2xl" />
         <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_auto]">
           <div>
             <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-clicon-secondary">
@@ -74,7 +72,7 @@ function HeroSection() {
       </article>
 
       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-1">
-        <article className="relative overflow-hidden rounded-md bg-[#191C1F] p-6 text-white">
+        <article className="relative overflow-hidden rounded-2xl bg-[#191C1F] p-6 text-white">
           <p className="text-sm font-semibold uppercase tracking-wider text-clicon-warning">
             {heroSideBanners[0].subtitle}
           </p>
@@ -94,7 +92,7 @@ function HeroSection() {
           </span>
         </article>
 
-        <article className="rounded-md bg-[#F2F4F5] p-6">
+        <article className="rounded-2xl bg-[#F2F4F5] p-6">
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-sm font-semibold uppercase tracking-wider text-clicon-muted">
@@ -127,9 +125,15 @@ function HeroSection() {
 function FeatureSection() {
   return (
     <section className="app-container">
-      <div className="grid divide-y rounded-md border border-clicon-border bg-white md:grid-cols-2 md:divide-x md:divide-y-0 lg:grid-cols-4">
+      <div className="grid divide-y rounded-2xl border border-clicon-border bg-white md:grid-cols-2 md:divide-x md:divide-y-0 lg:grid-cols-4">
         {featureCards.map((item) => (
-          <FeatureCard key={item.title} title={item.title} description={item.description} icon={item.icon} />
+          <FeatureCard
+            key={item.title}
+            title={item.title}
+            description={item.description}
+            marker={item.marker}
+            tone={item.tone}
+          />
         ))}
       </div>
     </section>
@@ -138,7 +142,7 @@ function FeatureSection() {
 
 function BestDealsSection() {
   return (
-    <section className="app-container rounded-md border border-clicon-border bg-white p-4 sm:p-6">
+    <section className="app-container rounded-2xl border border-clicon-border bg-white p-4 sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-clicon-border pb-4">
         <div className="flex flex-wrap items-center gap-4">
           <h2 className="text-2xl font-semibold text-clicon-slate">Best Deals</h2>
@@ -150,7 +154,7 @@ function BestDealsSection() {
       </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,2fr)]">
-        <article className="rounded-md border border-clicon-border bg-white p-4">
+        <article className="rounded-xl border border-clicon-border bg-white p-4">
           <Image
             src={bestDealFeatured.image}
             alt={bestDealFeatured.title}
@@ -199,7 +203,7 @@ function BestDealsSection() {
 
 function CategoriesSection() {
   return (
-    <section className="app-container rounded-md border border-clicon-border bg-white p-4 sm:p-6">
+    <section className="app-container rounded-2xl border border-clicon-border bg-white p-4 sm:p-6">
       <h2 className="text-center text-2xl font-semibold text-clicon-slate">Shop with Categories</h2>
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
         {shopCategories.map((item) => (
@@ -213,7 +217,7 @@ function CategoriesSection() {
 function FeaturedProductsSectionOne() {
   return (
     <section className="app-container grid gap-4 xl:grid-cols-[280px_minmax(0,1fr)]">
-      <article className="flex h-full flex-col justify-between rounded-md bg-clicon-darkBlue p-6 text-white">
+      <article className="flex h-full flex-col justify-between rounded-2xl bg-clicon-darkBlue p-6 text-white">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-clicon-warning">Computer & Accessories</p>
           <h3 className="mt-3 text-4xl font-semibold">32% Discount</h3>
@@ -234,7 +238,7 @@ function FeaturedProductsSectionOne() {
         </div>
       </article>
 
-      <div className="rounded-md border border-clicon-border bg-white p-4 sm:p-6">
+      <div className="rounded-2xl border border-clicon-border bg-white p-4 sm:p-6">
         <SectionHeading title="Featured Products" tabs={featuredTabLabels} />
         <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {featuredProductsOne.map((product) => (
@@ -249,7 +253,7 @@ function FeaturedProductsSectionOne() {
 function BannersSection() {
   return (
     <section className="app-container grid gap-4 lg:grid-cols-2">
-      <article className="rounded-md bg-clicon-slate p-6 text-white sm:p-8">
+      <article className="rounded-2xl bg-clicon-slate p-6 text-white sm:p-8">
         <p className="text-xs font-semibold uppercase tracking-[0.12em] text-clicon-warning">Introducing</p>
         <h3 className="mt-3 text-3xl font-semibold leading-tight">New Apple Homepod Mini</h3>
         <p className="mt-3 text-sm text-white/80">Jam-packed with innovation, HomePod mini delivers unexpectedly rich sound.</p>
@@ -259,7 +263,7 @@ function BannersSection() {
         </div>
       </article>
 
-      <article className="relative rounded-md bg-[#F2F4F5] p-6 sm:p-8">
+      <article className="relative rounded-2xl bg-[#F2F4F5] p-6 sm:p-8">
         <p className="text-xs font-semibold uppercase tracking-[0.12em] text-clicon-darkBlue">Introducing</p>
         <h3 className="mt-3 text-3xl font-semibold leading-tight text-clicon-slate">Xiaomi Mi 11 Ultra 12GB+256GB</h3>
         <p className="mt-3 text-sm text-clicon-muted">Data provided by internal laboratories. Industry measurement in controlled setup.</p>
@@ -280,7 +284,7 @@ function BannersSection() {
 function FeaturedProductsSectionTwo() {
   return (
     <section className="app-container grid gap-4 xl:grid-cols-[minmax(0,1fr)_280px]">
-      <div className="rounded-md border border-clicon-border bg-white p-4 sm:p-6">
+      <div className="rounded-2xl border border-clicon-border bg-white p-4 sm:p-6">
         <SectionHeading title="Featured Products" tabs={featuredTabLabelsTwo} />
         <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {featuredProductsTwo.map((product) => (
@@ -290,7 +294,7 @@ function FeaturedProductsSectionTwo() {
       </div>
 
       <div className="grid gap-4">
-        <article className="rounded-md bg-clicon-slate p-6 text-white">
+        <article className="rounded-2xl bg-clicon-slate p-6 text-white">
           <Image src="/clicon/image/add/airpod-02.png" alt="Xiaomi earbuds" width={180} height={124} className="h-28 w-auto object-contain" />
           <h3 className="mt-4 text-xl font-semibold">Xiaomi True Wireless Earbuds</h3>
           <p className="mt-2 text-sm text-white/80">Escape the noise, hear the magic.</p>
@@ -300,7 +304,7 @@ function FeaturedProductsSectionTwo() {
           </div>
         </article>
 
-        <article className="rounded-md bg-clicon-warning p-6 text-clicon-slate">
+        <article className="rounded-2xl bg-clicon-warning p-6 text-clicon-slate">
           <p className="text-xs font-semibold uppercase tracking-[0.12em]">Summer Sales</p>
           <h3 className="mt-2 text-3xl font-semibold">37% Discount</h3>
           <p className="mt-2 text-sm">only for SmartPhone product.</p>
@@ -317,7 +321,7 @@ function MiniColumnsSection() {
   return (
     <section className="app-container grid gap-4 md:grid-cols-2 xl:grid-cols-4">
       {miniColumns.map((column) => (
-        <article key={column.title} className="rounded-md border border-clicon-border bg-white p-4">
+        <article key={column.title} className="rounded-2xl border border-clicon-border bg-white p-4">
           <h3 className="text-sm font-semibold uppercase tracking-wider text-clicon-slate">{column.title}</h3>
           <div className="mt-4 space-y-3">
             {column.items.map((item) => (
@@ -332,7 +336,7 @@ function MiniColumnsSection() {
 
 function CtaSection() {
   return (
-    <section className="app-container overflow-hidden rounded-md bg-clicon-slate px-6 py-10 text-white sm:px-10">
+    <section className="app-container overflow-hidden rounded-2xl bg-clicon-slate px-6 py-10 text-white sm:px-10">
       <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_auto]">
         <div>
           <p className="text-sm font-semibold uppercase tracking-wider text-clicon-warning">Save up to $200.00</p>
@@ -356,7 +360,7 @@ function CtaSection() {
 
 function NewsSection() {
   return (
-    <section className="bg-clicon-surface py-10">
+    <section className="py-10">
       <div className="app-container">
         <h2 className="text-center text-3xl font-semibold text-clicon-slate">Latest News</h2>
         <div className="mt-6 grid gap-4 lg:grid-cols-3">
@@ -369,53 +373,12 @@ function NewsSection() {
   );
 }
 
-function NewsletterSection() {
-  return (
-    <section className="bg-clicon-darkBlue py-12 text-white">
-      <div className="app-container text-center">
-        <h2 className="text-3xl font-semibold">Subscribe to our newsletter</h2>
-        <p className="mx-auto mt-3 max-w-2xl text-white/80">
-          Praesent fringilla erat a lacinia egestas. Donec vehicula tempor libero et cursus.
-        </p>
-
-        <form className="mx-auto mt-6 flex w-full max-w-xl flex-col gap-3 rounded-md bg-white p-3 sm:flex-row" action="#" method="post">
-          <input
-            type="email"
-            name="email"
-            placeholder="Email address"
-            className="h-11 flex-1 rounded border border-clicon-border px-3 text-sm text-clicon-slate outline-none focus:border-clicon-secondary"
-          />
-          <button
-            type="submit"
-            className="inline-flex h-11 items-center justify-center rounded bg-clicon-primary px-5 text-sm font-semibold uppercase tracking-wide text-white transition hover:bg-clicon-primary/90"
-          >
-            Subscribe
-          </button>
-        </form>
-
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-6 opacity-85">
-          {['googel', 'amaazon', 'philips', 'toshiba', 'samsung'].map((brand) => (
-            <Image
-              key={brand}
-              src={`/clicon/image/logo/${brand}.png`}
-              alt={brand}
-              width={96}
-              height={32}
-              className="h-7 w-auto object-contain"
-            />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 function FooterSection() {
   return (
-    <footer className="bg-clicon-slate py-6 text-center text-sm text-white/70">
+    <footer className="bg-[#081224] py-6 text-center text-sm text-white/70">
       <div className="app-container">
         <p>
-          Crafted in React + Tailwind. Visit your existing pages: <Link href="/auth" className="text-white">Auth</Link>,{' '}
+          Crafted in React + Tailwind. Visit your existing pages: <Link href="/" className="text-white">Landing</Link>,{' '}
           <Link href="/feed" className="text-white">Feed</Link>, <Link href="/post" className="text-white">Post</Link>.
         </p>
       </div>
@@ -425,18 +388,17 @@ function FooterSection() {
 
 export default function MarketplaceHome() {
   return (
-    <div className="space-y-6 pb-0">
-      {/* <HeroSection /> */}
-      {/* <FeatureSection /> */}
+    <div className="space-y-6 pb-6">
+      <HeroSection />
+      <FeatureSection />
       <BestDealsSection />
       <CategoriesSection />
       <FeaturedProductsSectionOne />
       <BannersSection />
       <FeaturedProductsSectionTwo />
       <MiniColumnsSection />
-      {/* <CtaSection /> */}
-      {/* <NewsSection /> */}
-      {/* <NewsletterSection /> */}
+      <CtaSection />
+      <NewsSection />
       <FooterSection />
     </div>
   );

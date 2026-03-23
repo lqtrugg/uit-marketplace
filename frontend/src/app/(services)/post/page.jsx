@@ -24,8 +24,8 @@ export default function PostPage() {
     async function bootstrap() {
       try {
         const [sessionPayload, feedPayload] = await Promise.all([
-          requestJson('/api/auth/session'),
-          requestJson('/api/feed?limit=10')
+          requestJson('/api/sessions/current'),
+          requestJson('/api/posts?limit=10')
         ]);
 
         if (ignore) {
@@ -54,7 +54,7 @@ export default function PostPage() {
 
   async function refreshFeed() {
     try {
-      const payload = await requestJson('/api/feed?limit=10');
+      const payload = await requestJson('/api/posts?limit=10');
       setPosts(payload.posts || []);
     } catch (error) {
       setStatus({ tone: 'error', text: getErrorMessage(error, 'Failed to refresh posts.') });

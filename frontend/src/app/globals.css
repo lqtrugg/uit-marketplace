@@ -1,16 +1,15 @@
-@import '@fontsource/public-sans/400.css';
-@import '@fontsource/public-sans/500.css';
-@import '@fontsource/public-sans/600.css';
-@import '@fontsource/public-sans/700.css';
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Syne:wght@500;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
+  --font-body: 'Manrope', 'Segoe UI', sans-serif;
+  --font-display: 'Syne', 'Trebuchet MS', sans-serif;
   --panel-bg: #ffffff;
   --panel-line: #e4e7e9;
-  --panel-shadow: 0 8px 24px rgba(25, 28, 31, 0.08);
+  --panel-shadow: 0 8px 24px rgba(25, 28, 31, 0.12);
   --ink: #191c1f;
   --ink-muted: #5f6c72;
   --brand: #fa8232;
@@ -33,8 +32,12 @@
 
   body {
     min-height: 100vh;
-    background: #f2f4f5;
+    background:
+      radial-gradient(circle at 10% 10%, rgba(45, 165, 243, 0.2), transparent 28%),
+      radial-gradient(circle at 90% 0%, rgba(250, 130, 50, 0.15), transparent 24%),
+      linear-gradient(180deg, #edf3fb 0%, #f5f8fc 55%, #f2f4f7 100%);
     color: var(--ink);
+    font-family: var(--font-body);
   }
 
   a {
@@ -44,7 +47,11 @@
 
   h1,
   h2,
-  h3,
+  h3 {
+    margin: 0;
+    font-family: var(--font-display);
+  }
+
   p {
     margin: 0;
   }

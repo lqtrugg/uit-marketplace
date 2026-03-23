@@ -1,0 +1,16 @@
+{
+  "/_not-found/page": "/_not-found",
+  "/(services)/post/page": "/post",
+  "/(services)/post/success/page": "/post/success",
+  "/home/page": "/home",
+  "/(services)/reserved/page": "/reserved",
+  "/(services)/feed/page": "/feed",
+  "/(services)/auth/page": "/auth",
+  "/items/[id]/page": "/items/[id]",
+  "/(services)/payment/success/page": "/payment/success",
+  "/settings/dashboard/page": "/settings/dashboard",
+  "/page": "/",
+  "/settings/page": "/settings",
+  "/social-profile/page": "/social-profile",
+  "/shop/page": "/shop"
+}

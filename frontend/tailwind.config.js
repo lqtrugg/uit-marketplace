@@ -17,7 +17,8 @@ module.exports = {
         }
       },
       fontFamily: {
-        sans: ['Public Sans', 'system-ui', 'sans-serif']
+        sans: ['Manrope', 'Public Sans', 'system-ui', 'sans-serif'],
+        display: ['Syne', 'Manrope', 'sans-serif']
       },
       boxShadow: {
         card: '0 8px 24px rgba(25, 28, 31, 0.08)'
