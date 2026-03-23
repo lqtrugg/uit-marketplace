@@ -9,6 +9,7 @@ const SYNTHETIC_DISTRICT_CODE = 79000;
 const SYNTHETIC_WARD_CODE_OFFSET = 790000;
 const DEFAULT_LIST_LIMIT = 200;
 const MAX_LIST_LIMIT = 2000;
+let hcmWardSyncPromise = null;
 
 function normalizeText(value) {
   return typeof value === 'string' ? value.trim() : '';
@@ -220,6 +221,25 @@ export async function listHcmWards(options = {}) {
 
   const dataSource = await getDataSource();
   const repository = dataSource.getRepository(HcmWardEntity);
+  const existingCount = await repository.count({
+    where: {
+      provinceCode: HCM_PROVINCE_CODE
+    }
+  });
+
+  if (existingCount === 0) {
+    if (!hcmWardSyncPromise) {
+      hcmWardSyncPromise = crawlAndSyncHcmWards()
+        .catch((error) => {
+          console.error('[HCM_WARDS_AUTO_SYNC_ERROR]', error.message);
+        })
+        .finally(() => {
+          hcmWardSyncPromise = null;
+        });
+    }
+
+    await hcmWardSyncPromise;
+  }
 
   const query = repository
     .createQueryBuilder('ward')

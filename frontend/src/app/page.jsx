@@ -6,8 +6,7 @@ import { useRouter } from 'next/navigation';
 import {
   clearStoredAuthToken,
   getErrorMessage,
-  requestJson,
-  setStoredAuthToken
+  requestJson
 } from '@/app/_lib/clientApi';
 
 export default function LandingPage() {
@@ -58,21 +57,13 @@ export default function LandingPage() {
       return;
     }
 
-    setStatus({ tone: 'info', text: 'Authenticating with JWT...' });
+    setStatus({ tone: 'info', text: 'Authenticating...' });
 
     try {
-      const payload = await requestJson('/api/sessions', {
+      await requestJson('/api/sessions', {
         method: 'POST',
         body: JSON.stringify({ credential: response.credential })
       });
-
-      const token = payload?.jwt?.token || '';
-
-      if (!token) {
-        throw new Error('JWT token is missing from auth response.');
-      }
-
-      setStoredAuthToken(token);
       router.replace('/home');
     } catch (error) {
       clearStoredAuthToken();

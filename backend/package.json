@@ -5,9 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "node --watch src/server.js",
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "sync:hcm-wards": "node src/scripts/syncHcmWards.js"
   },
   "dependencies": {
+    "@google-cloud/storage": "^7.19.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",

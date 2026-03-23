@@ -5,8 +5,7 @@ import { GoogleLogin, GoogleOAuthProvider, googleLogout } from '@react-oauth/goo
 import {
   clearStoredAuthToken,
   getErrorMessage,
-  requestJson,
-  setStoredAuthToken
+  requestJson
 } from '@/app/_lib/clientApi';
 
 export default function AuthPage() {
@@ -58,7 +57,6 @@ export default function AuthPage() {
         body: JSON.stringify({ credential: response.credential })
       });
 
-      setStoredAuthToken(payload?.jwt?.token || '');
       setCurrentUser(payload.user);
       setStatus({
         tone: 'success',

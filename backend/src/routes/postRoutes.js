@@ -1,8 +1,25 @@
 import { Router } from 'express';
 import { requireAuthenticatedUser } from '../services/authService.js';
+import { getFeed } from '../services/feedService.js';
 import { createPost, deletePost, sanitizePostContent } from '../services/postService.js';
 
 const postRoutes = Router();
+
+postRoutes.get('/', async (request, response) => {
+  try {
+    const payload = await getFeed({
+      limit: request.query?.limit,
+      before: request.query?.before,
+      authorGoogleId: request.query?.authorGoogleId,
+      keyword: request.query?.keyword
+    });
+
+    return response.json(payload);
+  } catch (error) {
+    console.error('[POST_LIST_ERROR]', error.message);
+    return response.status(500).json({ error: 'Failed to load posts.' });
+  }
+});
 
 postRoutes.post('/', async (request, response) => {
   try {

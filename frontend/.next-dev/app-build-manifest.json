@@ -16,25 +16,40 @@
       "static/chunks/main-app.js",
       "static/chunks/app/home/page.js"
     ],
-    "/items/[id]/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/items/[id]/page.js"
-    ],
     "/social-profile/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/social-profile/page.js"
+    ],
+    "/settings/dashboard/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/settings/dashboard/page.js"
+    ],
+    "/settings/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/settings/page.js"
     ],
     "/(services)/reserved/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/(services)/reserved/page.js"
     ],
+    "/items/[id]/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/items/[id]/page.js"
+    ],
     "/(services)/payment/success/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/(services)/payment/success/page.js"
+    ],
+    "/(services)/post/success/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(services)/post/success/page.js"
     ]
   }
 }
