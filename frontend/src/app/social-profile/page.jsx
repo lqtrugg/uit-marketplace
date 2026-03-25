@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
@@ -8,6 +9,7 @@ import {
   getErrorMessage,
   requestJson
 } from '@/app/_lib/clientApi';
+import PageHero from '@/app/_components/ui/PageHero';
 
 function getInitials(name) {
   if (!name) {
@@ -107,12 +109,18 @@ export default function SocialProfilePage() {
     return null;
   }
 
+  const myListingCount = Number(profile?.activity?.listingCount || profile?.activity?.postCount || 0);
+  const myLastListingAt = profile?.activity?.lastListingAt || profile?.activity?.lastPostAt || null;
+
   return (
     <section className="app-container py-8 sm:py-10">
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
         <article className="rounded-2xl border border-clicon-border bg-white p-6 shadow-card">
-          <h1 className="text-3xl font-bold text-clicon-slate">Social Profile</h1>
-          <p className="mt-1 text-sm text-clicon-muted">Your public profile and activity summary.</p>
+          <PageHero
+            iconSrc="/clicon/image/svg/user.svg"
+            title="Social Profile"
+            subtitle="Your public profile and activity summary."
+          />
 
           <div className="mt-6 flex flex-wrap items-center gap-4 rounded-xl bg-clicon-surface p-4">
             {profile.user.picture ? (
@@ -136,12 +144,12 @@ export default function SocialProfilePage() {
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
             <div className="rounded-xl border border-clicon-border p-4">
               <p className="text-xs uppercase tracking-wide text-clicon-muted">Posts</p>
-              <p className="mt-1 text-2xl font-bold text-clicon-slate">{profile.activity.postCount}</p>
+              <p className="mt-1 text-2xl font-bold text-clicon-slate">{myListingCount}</p>
             </div>
             <div className="rounded-xl border border-clicon-border p-4">
               <p className="text-xs uppercase tracking-wide text-clicon-muted">Last Post</p>
               <p className="mt-1 text-sm font-semibold text-clicon-slate">
-                {profile.activity.lastPostAt ? formatTime(profile.activity.lastPostAt) : 'No posts yet'}
+                {myLastListingAt ? formatTime(myLastListingAt) : 'No posts yet'}
               </p>
             </div>
           </div>
@@ -159,13 +167,38 @@ export default function SocialProfilePage() {
             ) : (
               topUsers.map((user, index) => (
                 <div key={user.googleId} className="flex items-center justify-between rounded-xl border border-clicon-border p-3">
-                  <div>
-                    <p className="text-sm font-semibold text-clicon-slate">
-                      #{index + 1} {user.name}
-                    </p>
-                    <p className="text-xs text-clicon-muted">{user.email}</p>
-                  </div>
-                  <p className="text-sm font-semibold text-clicon-secondary">{user.postCount} posts</p>
+                  {(() => {
+                    const isCurrentUser = profile?.user?.googleId && profile.user.googleId === user.googleId;
+                    return (
+                      <>
+                        <div>
+                          <p className="text-sm font-semibold text-clicon-slate">
+                            #{index + 1} {user.name}
+                          </p>
+                          <p className="text-xs text-clicon-muted">{user.email}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-semibold text-clicon-secondary">
+                            {user.listingCount || user.postCount || 0} posts
+                          </p>
+                          <Link
+                            href={`/social-profile/${encodeURIComponent(user.googleId)}`}
+                            className="inline-flex rounded-lg border border-clicon-border px-2.5 py-1.5 text-xs font-semibold text-clicon-darkBlue transition hover:bg-clicon-surface"
+                          >
+                            Profile
+                          </Link>
+                          {isCurrentUser ? null : (
+                            <Link
+                              href={`/chat/${encodeURIComponent(user.googleId)}`}
+                              className="inline-flex rounded-lg bg-clicon-primary px-2.5 py-1.5 text-xs font-semibold text-white transition hover:bg-clicon-secondary"
+                            >
+                              Chat
+                            </Link>
+                          )}
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
               ))
             )}

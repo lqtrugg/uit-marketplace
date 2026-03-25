@@ -20,12 +20,28 @@
   },
   "dynamicRoutes": [
     {
+      "page": "/chat/[googleId]",
+      "regex": "^/chat/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPgoogleId": "nxtPgoogleId"
+      },
+      "namedRegex": "^/chat/(?<nxtPgoogleId>[^/]+?)(?:/)?$"
+    },
+    {
       "page": "/items/[id]",
       "regex": "^/items/([^/]+?)(?:/)?$",
       "routeKeys": {
         "nxtPid": "nxtPid"
       },
       "namedRegex": "^/items/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/social-profile/[googleId]",
+      "regex": "^/social\\-profile/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPgoogleId": "nxtPgoogleId"
+      },
+      "namedRegex": "^/social\\-profile/(?<nxtPgoogleId>[^/]+?)(?:/)?$"
     }
   ],
   "staticRoutes": [
@@ -58,6 +74,12 @@
       "regex": "^/home(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/home(?:/)?$"
+    },
+    {
+      "page": "/offers",
+      "regex": "^/offers(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/offers(?:/)?$"
     },
     {
       "page": "/payment/success",

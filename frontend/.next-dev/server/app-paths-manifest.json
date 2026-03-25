@@ -1,10 +1,5 @@
 {
   "/home/page": "app/home/page.js",
-  "/(services)/reserved/page": "app/(services)/reserved/page.js",
-  "/items/[id]/page": "app/items/[id]/page.js",
-  "/social-profile/page": "app/social-profile/page.js",
-  "/(services)/post/success/page": "app/(services)/post/success/page.js",
-  "/settings/page": "app/settings/page.js",
-  "/settings/dashboard/page": "app/settings/dashboard/page.js",
-  "/(services)/payment/success/page": "app/(services)/payment/success/page.js"
+  "/(services)/offers/page": "app/(services)/offers/page.js",
+  "/page": "app/page.js"
 }

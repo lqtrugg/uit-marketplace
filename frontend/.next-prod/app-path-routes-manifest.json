@@ -1,16 +1,19 @@
 {
   "/_not-found/page": "/_not-found",
-  "/(services)/post/page": "/post",
+  "/(services)/auth/page": "/auth",
+  "/(services)/feed/page": "/feed",
+  "/(services)/payment/success/page": "/payment/success",
+  "/(services)/offers/page": "/offers",
   "/(services)/post/success/page": "/post/success",
+  "/(services)/post/page": "/post",
   "/home/page": "/home",
   "/(services)/reserved/page": "/reserved",
-  "/(services)/feed/page": "/feed",
-  "/(services)/auth/page": "/auth",
-  "/items/[id]/page": "/items/[id]",
-  "/(services)/payment/success/page": "/payment/success",
-  "/settings/dashboard/page": "/settings/dashboard",
+  "/chat/[googleId]/page": "/chat/[googleId]",
   "/page": "/",
+  "/items/[id]/page": "/items/[id]",
   "/settings/page": "/settings",
-  "/social-profile/page": "/social-profile",
-  "/shop/page": "/shop"
+  "/settings/dashboard/page": "/settings/dashboard",
+  "/shop/page": "/shop",
+  "/social-profile/[googleId]/page": "/social-profile/[googleId]",
+  "/social-profile/page": "/social-profile"
 }

@@ -3,10 +3,11 @@
 import { useEffect, useState } from 'react';
 import { GoogleLogin, GoogleOAuthProvider, googleLogout } from '@react-oauth/google';
 import {
-  clearStoredAuthToken,
   getErrorMessage,
+  logoutCurrentSession,
   requestJson
 } from '@/app/_lib/clientApi';
+import PageHero from '@/app/_components/ui/PageHero';
 
 export default function AuthPage() {
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
@@ -72,11 +73,7 @@ export default function AuthPage() {
 
   async function handleLogout() {
     try {
-      await requestJson('/api/sessions/current', {
-        method: 'DELETE'
-      });
-
-      clearStoredAuthToken();
+      await logoutCurrentSession();
       googleLogout();
       setCurrentUser(null);
       setStatus({ tone: 'info', text: 'Logged out.' });
@@ -87,12 +84,12 @@ export default function AuthPage() {
 
   const content = (
     <section className="panel">
-      <div className="panel-head">
-        <h1>Auth Service</h1>
-        <span className="domain-tag">@gm.uit.edu.vn only</span>
-      </div>
-
-      <p className="subtitle">Use Google sign-in. Only verified institutional accounts are accepted.</p>
+      <PageHero
+        iconSrc="/clicon/image/svg/lock.svg"
+        title="Auth Service"
+        subtitle="Use Google sign-in. Only verified institutional accounts are accepted."
+        pill="@gm.uit.edu.vn"
+      />
 
       <div className="auth-block">
         {!googleClientId ? (
@@ -115,10 +112,18 @@ export default function AuthPage() {
         )}
       </div>
 
-      <div className="hero-grid single-grid">
+      <div className="hero-grid">
         <article>
-          <span>Session state</span>
+          <span>Session State</span>
           <strong>{loadingSession ? 'Loading...' : currentUser ? 'Authenticated' : 'Guest'}</strong>
+        </article>
+        <article>
+          <span>Provider</span>
+          <strong>Google OAuth</strong>
+        </article>
+        <article>
+          <span>Access</span>
+          <strong>{currentUser ? 'Granted' : 'Sign in required'}</strong>
         </article>
       </div>
 

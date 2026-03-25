@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { formatTime, getErrorMessage, requestJson } from '@/app/_lib/clientApi';
+import PageHero from '@/app/_components/ui/PageHero';
 
 export default function FeedPage() {
   const [posts, setPosts] = useState([]);
@@ -79,14 +80,17 @@ export default function FeedPage() {
 
   return (
     <section className="panel">
-      <div className="panel-head">
-        <h1>Feed Service</h1>
-        <button type="button" className="btn ghost" onClick={refreshFeed} disabled={loadingFeed}>
-          {loadingFeed ? 'Refreshing...' : 'Refresh'}
-        </button>
-      </div>
-
-      <p className="subtitle">Public timeline of posts, ordered newest first.</p>
+      <PageHero
+        iconSrc="/clicon/image/svg/calendar.svg"
+        title="Feed Service"
+        subtitle="Public timeline of posts, ordered newest first."
+        actions={[
+          {
+            label: loadingFeed ? 'Refreshing...' : 'Refresh',
+            onClick: refreshFeed
+          }
+        ]}
+      />
 
       <div className="panel-head compact-head">
         <h2>Posts</h2>
@@ -99,16 +103,25 @@ export default function FeedPage() {
         <p className="placeholder">No posts yet.</p>
       ) : (
         <ul className="feed-list">
-          {posts.map((post) => (
-            <li key={post.id}>
-              <div>
-                <p className="post-content">{post.content}</p>
-                <p className="post-meta">
-                  {post.authorName} ({post.authorEmail}) | {formatTime(post.createdAt)}
-                </p>
-              </div>
-            </li>
-          ))}
+          {posts.map((post) => {
+            const badge =
+              (post.authorName || post.authorEmail || '?')
+                .trim()
+                .slice(0, 1)
+                .toUpperCase() || '?';
+
+            return (
+              <li key={post.id} className="post-row">
+                <div className="post-owner-badge">{badge}</div>
+                <div className="post-body">
+                  <p className="post-content">{post.content}</p>
+                  <p className="post-meta">
+                    {post.authorName} ({post.authorEmail}) | {formatTime(post.createdAt)}
+                  </p>
+                </div>
+              </li>
+            );
+          })}
         </ul>
       )}
 

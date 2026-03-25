@@ -142,6 +142,24 @@ export const ItemEntity = new EntitySchema({
       name: 'updated_at'
     }
   },
+  checks: [
+    {
+      name: 'CHK_item_duration_non_negative',
+      expression: '"duration_days" >= 0 AND "duration_hours" >= 0'
+    },
+    {
+      name: 'CHK_item_listing_status_valid',
+      expression: `"listing_status" IN ('active','reserved','sold','hidden')`
+    },
+    {
+      name: 'CHK_item_reserved_status_consistency',
+      expression: `("listing_status" <> 'reserved') OR ("reserved_by_google_id" IS NOT NULL AND "reserved_at" IS NOT NULL)`
+    },
+    {
+      name: 'CHK_item_sold_status_consistency',
+      expression: `("listing_status" <> 'sold') OR ("sold_at" IS NOT NULL)`
+    }
+  ],
   indices: [
     {
       name: 'IDX_item_created_at',

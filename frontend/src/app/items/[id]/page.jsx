@@ -5,18 +5,14 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
   clearStoredAuthToken,
-  confirmDummyDepositByReference,
   formatTime,
   getItemDetail,
   getErrorMessage,
   getSimilarItems,
   listMyFavoriteItems,
-  markItemSold,
-  requestDummyDepositSession,
+  makeOffer,
   requestJson,
-  reserveItem,
   setItemFavorite,
-  unreserveItem,
   updateItemStatus
 } from '@/app/_lib/clientApi';
 
@@ -26,31 +22,14 @@ function toReadableDuration(item) {
   return `${days} day(s) ${hours} hour(s)`;
 }
 
-function parseDummyDepositAmount(rawPrice) {
-  const digitsOnly = String(rawPrice || '')
-    .replace(/[^\d]/g, '')
-    .trim();
-  const parsed = Number.parseInt(digitsOnly, 10);
+function parseOfferDefaultPrice(rawPrice) {
+  const digitsOnly = String(rawPrice || '').replace(/[^\d]/g, '').trim();
 
-  if (!Number.isFinite(parsed) || Number.isNaN(parsed) || parsed <= 0) {
-    return 50000;
+  if (!digitsOnly) {
+    return '';
   }
 
-  return Math.min(Math.max(parsed, 10000), 5_000_000);
-}
-
-function formatVndCurrency(value) {
-  const amount = Number.parseInt(String(value || ''), 10);
-
-  if (!Number.isFinite(amount) || Number.isNaN(amount) || amount <= 0) {
-    return 'N/A';
-  }
-
-  return new Intl.NumberFormat('vi-VN', {
-    style: 'currency',
-    currency: 'VND',
-    maximumFractionDigits: 0
-  }).format(amount);
+  return digitsOnly;
 }
 
 export default function ItemDetailPage() {
@@ -64,11 +43,9 @@ export default function ItemDetailPage() {
   const [currentUser, setCurrentUser] = useState(null);
   const [isFavorited, setIsFavorited] = useState(false);
   const [similarItems, setSimilarItems] = useState([]);
-  const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
-  const [depositLoading, setDepositLoading] = useState(false);
-  const [depositConfirming, setDepositConfirming] = useState(false);
-  const [depositSession, setDepositSession] = useState(null);
-  const [depositError, setDepositError] = useState('');
+  const [offerPrice, setOfferPrice] = useState('');
+  const [offerMessage, setOfferMessage] = useState('');
+  const [offerSubmitting, setOfferSubmitting] = useState(false);
 
   useEffect(() => {
     let ignore = false;
@@ -101,6 +78,7 @@ export default function ItemDetailPage() {
         if (!ignore) {
           setItem(loadedItem || null);
           setIsFavorited(favoriteItems.some((favorite) => favorite.id === itemId));
+          setOfferPrice(parseOfferDefaultPrice(loadedItem?.price));
         }
       } catch (error) {
         if (!ignore) {
@@ -191,57 +169,26 @@ export default function ItemDetailPage() {
     }
   }
 
-  async function handleOpenDepositModal() {
-    if (!item?.id || depositLoading) {
+  async function handleMakeOffer() {
+    if (!item?.id || isSeller || offerSubmitting) {
       return;
     }
 
-    setIsDepositModalOpen(true);
-    setDepositLoading(true);
-    setDepositError('');
-    setDepositSession(null);
+    const normalizedPrice = String(offerPrice || '').trim();
 
     try {
-      const session = await requestDummyDepositSession({
+      setOfferSubmitting(true);
+      setActionStatus('');
+      await makeOffer({
         itemId: item.id,
-        amount: parseDummyDepositAmount(item.price)
+        offeredPrice: normalizedPrice,
+        message: offerMessage
       });
-      setDepositSession(session);
+      setActionStatus('Offer submitted successfully.');
     } catch (error) {
-      setDepositError(getErrorMessage(error, 'Failed to create dummy deposit session.'));
+      setActionStatus(getErrorMessage(error, 'Failed to submit offer.'));
     } finally {
-      setDepositLoading(false);
-    }
-  }
-
-  function handleCloseDepositModal() {
-    if (depositLoading || depositConfirming) {
-      return;
-    }
-
-    setIsDepositModalOpen(false);
-  }
-
-  async function handleDepositNext() {
-    if (!depositSession || depositLoading || depositConfirming) {
-      return;
-    }
-
-    setDepositConfirming(true);
-    setDepositError('');
-
-    try {
-      const confirmed = await confirmDummyDepositByReference(depositSession.referenceId);
-      const reference = encodeURIComponent(confirmed.referenceId);
-      const itemId = Number.parseInt(String(confirmed.itemId || item.id || ''), 10);
-      const itemQuery = Number.isInteger(itemId) && itemId > 0 ? `&itemId=${itemId}` : '';
-
-      setIsDepositModalOpen(false);
-      router.push(`/payment/success?referenceId=${reference}${itemQuery}`);
-    } catch (error) {
-      setDepositError(getErrorMessage(error, 'Failed to confirm dummy deposit.'));
-    } finally {
-      setDepositConfirming(false);
+      setOfferSubmitting(false);
     }
   }
 
@@ -266,12 +213,13 @@ export default function ItemDetailPage() {
   }
 
   const isSeller = Boolean(currentUser?.googleId) && currentUser.googleId === item.sellerGoogleId;
-  const isReservedByCurrentUser =
-    Boolean(currentUser?.googleId) && currentUser.googleId === item.reservedByGoogleId;
-  const canReserve = !isSeller && item.listingStatus === 'active';
-  const canUnreserve = item.listingStatus === 'reserved' && (isSeller || isReservedByCurrentUser);
-  const canMarkSold = isSeller && item.listingStatus !== 'sold';
-  const canReopen = isSeller && (item.listingStatus === 'reserved' || item.listingStatus === 'hidden');
+  const canMakeOffer = !isSeller && item.listingStatus === 'active';
+  const offerDisabledReason = isSeller
+    ? 'Seller cannot offer on their own item.'
+    : item.listingStatus !== 'active'
+      ? 'This listing is closed and cannot receive offers.'
+      : '';
+  const canReopen = isSeller && item.listingStatus === 'hidden';
   const canHide = isSeller && item.listingStatus === 'active';
 
   return (
@@ -357,19 +305,41 @@ export default function ItemDetailPage() {
               <p className="text-xs uppercase tracking-wide text-clicon-muted">Price</p>
               <p className="mt-1 text-2xl font-bold text-clicon-secondary">{item.price}</p>
             </div>
-
             <div className="rounded-xl border border-clicon-border p-4">
-              <p className="text-xs uppercase tracking-wide text-clicon-muted">Dummy Payment Service</p>
+              <p className="text-xs uppercase tracking-wide text-clicon-muted">Make Offer</p>
               <p className="mt-1 text-sm text-clicon-muted">
-                Generate a temporary dummy QR for deposit simulation.
+                Enter your proposed price. Seller will review in dashboard.
               </p>
+              <label className="mt-3 grid gap-1.5">
+                <span className="text-xs font-semibold uppercase tracking-wide text-clicon-muted">Offered Price (VND)</span>
+                <input
+                  type="text"
+                  value={offerPrice}
+                  onChange={(event) => setOfferPrice(event.target.value.replace(/[^\d]/g, ''))}
+                  className="h-10 rounded-lg border border-clicon-border px-3 text-sm text-clicon-slate outline-none focus:border-clicon-secondary"
+                  placeholder="e.g. 400000"
+                />
+              </label>
+              <label className="mt-3 grid gap-1.5">
+                <span className="text-xs font-semibold uppercase tracking-wide text-clicon-muted">Message (optional)</span>
+                <textarea
+                  rows={3}
+                  value={offerMessage}
+                  onChange={(event) => setOfferMessage(event.target.value)}
+                  className="rounded-lg border border-clicon-border px-3 py-2 text-sm text-clicon-slate outline-none focus:border-clicon-secondary"
+                  placeholder="Can meet this weekend..."
+                />
+              </label>
+              {offerDisabledReason ? (
+                <p className="mt-2 text-xs text-clicon-muted">{offerDisabledReason}</p>
+              ) : null}
               <button
                 type="button"
-                onClick={handleOpenDepositModal}
-                disabled={depositLoading || depositConfirming}
+                onClick={handleMakeOffer}
+                disabled={offerSubmitting || !offerPrice || !canMakeOffer}
                 className="mt-3 inline-flex h-10 items-center justify-center rounded-lg bg-clicon-primary px-4 text-sm font-semibold text-white transition hover:bg-clicon-secondary disabled:opacity-60"
               >
-                {depositLoading ? 'Preparing QR...' : depositConfirming ? 'Confirming...' : 'Place Deposit'}
+                {offerSubmitting ? 'Submitting...' : 'Offer'}
               </button>
             </div>
 
@@ -420,36 +390,6 @@ export default function ItemDetailPage() {
                 >
                   {isFavorited ? 'Unfavorite' : 'Favorite'}
                 </button>
-                {canReserve ? (
-                  <button
-                    type="button"
-                    onClick={() => runItemAction(() => reserveItem(item.id), 'Item reserved successfully.')}
-                    disabled={actionLoading}
-                    className="inline-flex rounded-lg bg-clicon-primary px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-clicon-secondary disabled:opacity-60"
-                  >
-                    Reserve
-                  </button>
-                ) : null}
-                {canUnreserve ? (
-                  <button
-                    type="button"
-                    onClick={() => runItemAction(() => unreserveItem(item.id), 'Reservation removed.')}
-                    disabled={actionLoading}
-                    className="inline-flex rounded-lg border border-clicon-border px-3 py-1.5 text-xs font-semibold text-clicon-darkBlue transition hover:bg-clicon-surface disabled:opacity-60"
-                  >
-                    Unreserve
-                  </button>
-                ) : null}
-                {canMarkSold ? (
-                  <button
-                    type="button"
-                    onClick={() => runItemAction(() => markItemSold(item.id), 'Item marked as sold.')}
-                    disabled={actionLoading}
-                    className="inline-flex rounded-lg bg-clicon-secondary px-3 py-1.5 text-xs font-semibold text-white transition hover:brightness-95 disabled:opacity-60"
-                  >
-                    Mark Sold
-                  </button>
-                ) : null}
                 {canReopen ? (
                   <button
                     type="button"
@@ -487,89 +427,6 @@ export default function ItemDetailPage() {
           </aside>
         </div>
       </article>
-
-      {isDepositModalOpen ? (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-2xl border border-clicon-border bg-white shadow-card">
-            <div className="flex items-center justify-between border-b border-clicon-border px-5 py-4">
-              <div>
-                <h2 className="text-xl font-bold text-clicon-slate">Dummy Deposit QR</h2>
-                <p className="text-xs text-clicon-muted">For demo only. No real money movement.</p>
-              </div>
-              <button
-                type="button"
-                onClick={handleCloseDepositModal}
-                disabled={depositLoading || depositConfirming}
-                className="rounded-lg border border-clicon-border px-3 py-1.5 text-sm font-medium text-clicon-muted transition hover:bg-clicon-surface disabled:opacity-60"
-              >
-                Close
-              </button>
-            </div>
-
-            <div className="space-y-3 p-5">
-              {depositLoading ? (
-                <div className="rounded-xl border border-clicon-border bg-clicon-surface p-4 text-sm text-clicon-muted">
-                  Generating dummy QR...
-                </div>
-              ) : null}
-              {depositConfirming ? (
-                <div className="rounded-xl border border-clicon-border bg-clicon-surface p-4 text-sm text-clicon-muted">
-                  Confirming dummy deposit...
-                </div>
-              ) : null}
-
-              {depositError ? (
-                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                  {depositError}
-                </div>
-              ) : null}
-
-              {depositSession ? (
-                <div className="space-y-3 rounded-xl border border-clicon-border bg-clicon-surface p-4">
-                  <img
-                    src={depositSession.qrCodeDataUrl}
-                    alt="Dummy deposit QR code"
-                    className="mx-auto h-56 w-56 rounded-lg border border-clicon-border bg-white p-2"
-                  />
-                  <div className="space-y-1 text-xs text-clicon-muted">
-                    <p>
-                      <span className="font-semibold text-clicon-slate">Ref:</span>{' '}
-                      {depositSession.referenceId}
-                    </p>
-                    <p>
-                      <span className="font-semibold text-clicon-slate">Amount:</span>{' '}
-                      {formatVndCurrency(depositSession.amount)}
-                    </p>
-                    <p>
-                      <span className="font-semibold text-clicon-slate">Expire:</span>{' '}
-                      {formatTime(depositSession.expiresAt)}
-                    </p>
-                  </div>
-                </div>
-              ) : null}
-
-              <div className="flex items-center justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={handleCloseDepositModal}
-                  disabled={depositLoading || depositConfirming}
-                  className="inline-flex h-10 items-center justify-center rounded-lg border border-clicon-border px-4 text-sm font-medium text-clicon-muted transition hover:bg-clicon-surface disabled:opacity-60"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handleDepositNext}
-                  disabled={depositLoading || depositConfirming || !depositSession || Boolean(depositError)}
-                  className="inline-flex h-10 items-center justify-center rounded-lg bg-clicon-primary px-4 text-sm font-semibold text-white transition hover:bg-clicon-secondary disabled:opacity-60"
-                >
-                  {depositConfirming ? 'Processing...' : 'Next'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : null}
 
       {similarItems.length > 0 ? (
         <article className="mt-6 rounded-2xl border border-clicon-border bg-white p-5 shadow-card sm:p-6">

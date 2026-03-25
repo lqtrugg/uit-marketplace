@@ -6,7 +6,11 @@
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
-    "sync:hcm-wards": "node src/scripts/syncHcmWards.js"
+    "sync:hcm-wards": "node src/scripts/syncHcmWards.js",
+    "seed:dummy-profile": "node src/scripts/seedDummyProfile.js",
+    "test:unit": "vitest run test/unit",
+    "test:unit:watch": "vitest test/unit",
+    "test": "npm run test:unit"
   },
   "dependencies": {
     "@google-cloud/storage": "^7.19.0",
@@ -18,5 +22,8 @@
     "pg": "^8.16.3",
     "reflect-metadata": "^0.2.2",
     "typeorm": "^0.3.25"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.4"
   }
 }

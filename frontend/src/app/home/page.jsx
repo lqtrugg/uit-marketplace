@@ -182,66 +182,70 @@ export default function HomePage() {
 
   return (
     <section className="app-container py-8 sm:py-10">
-      <div className="rounded-2xl border border-clicon-border bg-white p-5 shadow-card sm:p-6">
-        <div className="flex flex-wrap items-end justify-between gap-3 border-b border-clicon-border pb-4">
-          <div>
-            <h1 className="text-3xl font-bold text-clicon-slate">Item Listing Service</h1>
-            <p className="mt-1 text-sm text-clicon-muted">
-              Browse items posted by verified users.
+      <div className="rounded-[28px] border border-clicon-border bg-white p-5 shadow-card sm:p-7">
+        <div className="rounded-[24px] bg-gradient-to-r from-[#eaf5ff] via-[#f6fbff] to-[#fff6ee] p-5 sm:p-6">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p className="inline-flex rounded-full bg-clicon-warning/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-clicon-slate">
+                Clicon Style Feed
+              </p>
+              <h1 className="mt-3 text-3xl font-bold text-clicon-slate">Item Listing Service</h1>
+              <p className="mt-1 text-sm text-clicon-muted">Browse items posted by verified users.</p>
+            </div>
+            <p className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-clicon-slate shadow-sm">
+              {items.length} items
             </p>
-            {keyword ? (
-              <p className="mt-1 text-xs font-medium text-clicon-muted">
-                Search keyword: <span className="text-clicon-slate">{keyword}</span>
-              </p>
-            ) : null}
-            {geoResolved ? (
-              <p className="mt-1 text-xs font-medium text-clicon-muted">
-                {nearCoordinates
-                  ? 'GPS active: ưu tiên bài đăng theo khoảng cách gần nhất (chim bay).'
-                  : 'GPS unavailable, dùng feed mặc định.'}
-              </p>
-            ) : (
-              <p className="mt-1 text-xs font-medium text-clicon-muted">Đang xác định vị trí GPS...</p>
-            )}
           </div>
-          <p className="rounded-full bg-clicon-surface px-3 py-1 text-sm font-semibold text-clicon-slate">
-            {items.length} items
-          </p>
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            <span className="inline-flex items-center gap-2 rounded-full border border-clicon-border bg-white px-3 py-1.5 text-xs text-clicon-muted">
+              <span className="grid size-5 place-content-center rounded-full bg-clicon-primary/10 text-clicon-primary">🔎</span>
+              {keyword ? `Keyword: ${keyword}` : 'No keyword filter'}
+            </span>
+            <span className="inline-flex items-center gap-2 rounded-full border border-clicon-border bg-white px-3 py-1.5 text-xs text-clicon-muted">
+              <span className="grid size-5 place-content-center rounded-full bg-clicon-secondary/10 text-clicon-secondary">📍</span>
+              {geoResolved ? (nearCoordinates ? 'GPS ranked by distance' : 'Default ranking') : 'Resolving GPS...'}
+            </span>
+          </div>
         </div>
 
         {itemStatus ? (
-          <div className="mt-6 rounded-xl border border-clicon-border bg-clicon-surface p-5 text-sm text-clicon-muted">
+          <div className="mt-6 rounded-2xl border border-clicon-border bg-clicon-surface p-5 text-sm text-clicon-muted">
             {itemStatus}
           </div>
         ) : loadingItems ? (
-          <div className="mt-6 rounded-xl border border-clicon-border bg-clicon-surface p-5 text-sm text-clicon-muted">
+          <div className="mt-6 rounded-2xl border border-clicon-border bg-clicon-surface p-5 text-sm text-clicon-muted">
             Loading listing...
           </div>
         ) : items.length === 0 ? (
-          <div className="mt-6 rounded-xl border border-clicon-border bg-clicon-surface p-5 text-sm text-clicon-muted">
+          <div className="mt-6 rounded-2xl border border-clicon-border bg-clicon-surface p-5 text-sm text-clicon-muted">
             No items found.
           </div>
         ) : (
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {items.map((item) => {
-              const imageUrl =
-                Array.isArray(item.imageUrls) && item.imageUrls.length ? item.imageUrls[0] : '';
+              const imageUrl = Array.isArray(item.imageUrls) && item.imageUrls.length ? item.imageUrls[0] : '';
 
               return (
                 <Link
                   key={item.id}
                   href={`/items/${item.id}`}
-                  className="rounded-xl border border-clicon-border bg-white p-4 transition hover:-translate-y-0.5 hover:shadow-card"
+                  className="group rounded-[22px] border border-clicon-border bg-white p-4 transition hover:-translate-y-0.5 hover:shadow-card"
                 >
-                  <div className="mb-3 overflow-hidden rounded-lg border border-clicon-border bg-clicon-surface">
+                  <div className="mb-3 overflow-hidden rounded-2xl border border-clicon-border bg-clicon-surface">
                     {imageUrl ? (
-                      <img src={imageUrl} alt={item.itemName} className="h-40 w-full object-cover" />
+                      <img src={imageUrl} alt={item.itemName} className="h-44 w-full object-cover transition group-hover:scale-[1.02]" />
                     ) : (
                       <div className="grid h-40 place-content-center text-xs text-clicon-muted">No image</div>
                     )}
                   </div>
                   <p className="line-clamp-2 text-sm font-semibold text-clicon-slate">{item.itemName}</p>
-                  <p className="mt-2 text-xl font-bold text-clicon-secondary">{item.price}</p>
+                  <div className="mt-3 flex items-center justify-between">
+                    <p className="text-xl font-bold text-clicon-secondary">{item.price}</p>
+                    <span className="rounded-full bg-clicon-primary px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white">
+                      View
+                    </span>
+                  </div>
                 </Link>
               );
             })}

@@ -60,6 +60,40 @@ export const DepositEntity = new EntitySchema({
       name: 'updated_at'
     }
   },
+  relations: {
+    buyer: {
+      type: 'many-to-one',
+      target: 'User',
+      joinColumn: {
+        name: 'buyer_google_id',
+        referencedColumnName: 'googleId'
+      },
+      onDelete: 'CASCADE'
+    },
+    item: {
+      type: 'many-to-one',
+      target: 'Item',
+      joinColumn: {
+        name: 'item_id',
+        referencedColumnName: 'id'
+      },
+      onDelete: 'CASCADE'
+    }
+  },
+  checks: [
+    {
+      name: 'CHK_deposit_amount_positive',
+      expression: '"amount" > 0'
+    },
+    {
+      name: 'CHK_deposit_status_valid',
+      expression: `"status" IN ('pending','confirmed','expired','cancelled','failed')`
+    },
+    {
+      name: 'CHK_deposit_confirmed_at_consistency',
+      expression: `("status" <> 'confirmed') OR ("confirmed_at" IS NOT NULL)`
+    }
+  ],
   indices: [
     {
       name: 'IDX_deposit_buyer_google_id',

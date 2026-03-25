@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { clearStoredAuthToken, getErrorMessage, requestJson } from '@/app/_lib/clientApi';
+import PageHero from '@/app/_components/ui/PageHero';
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -113,26 +114,15 @@ export default function SettingsPage() {
   return (
     <section className="app-container py-8 sm:py-10">
       <article className="mx-auto w-full max-w-3xl rounded-2xl border border-clicon-border bg-white p-6 shadow-card sm:p-8">
-        <h1 className="text-3xl font-bold text-clicon-slate">Account Settings</h1>
-        <p className="mt-1 text-sm text-clicon-muted">
-          Update the information shown on your social profile.
-        </p>
-        <div className="mt-4">
-          <div className="flex flex-wrap gap-2">
-            <Link
-              href="/settings/dashboard"
-              className="inline-flex rounded-lg border border-clicon-border px-3 py-2 text-sm font-semibold text-clicon-darkBlue transition hover:bg-clicon-surface"
-            >
-              Open My Item Dashboard
-            </Link>
-            <Link
-              href="/reserved"
-              className="inline-flex rounded-lg border border-clicon-border px-3 py-2 text-sm font-semibold text-clicon-darkBlue transition hover:bg-clicon-surface"
-            >
-              Open Reserved Items
-            </Link>
-          </div>
-        </div>
+        <PageHero
+          iconSrc="/clicon/image/svg/user.svg"
+          title="Account Settings"
+          subtitle="Update the information shown on your social profile."
+          actions={[
+            { href: '/settings/dashboard', label: 'Open My Item Dashboard' },
+            { href: '/offers', label: 'Open My Offers' }
+          ]}
+        />
 
         <form className="mt-6 grid gap-4" onSubmit={handleSubmit}>
           <label className="grid gap-1.5">

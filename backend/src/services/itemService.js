@@ -269,22 +269,97 @@ function normalizeVideoUrls(rawValue) {
   };
 }
 
-function normalizeSelectValue(label, rawValue, allowedValues, fallbackValue) {
-  const normalized = normalizeText(rawValue);
+function normalizeNegotiableInput(rawValue) {
+  const normalized = normalizeText(rawValue).toLowerCase();
 
   if (!normalized) {
     return {
-      value: fallbackValue,
+      value: 'Yes',
       error: ''
     };
   }
 
-  const matched = allowedValues.find((item) => item.toLowerCase() === normalized.toLowerCase());
+  if (['yes', 'y', 'true', '1'].includes(normalized)) {
+    return {
+      value: 'Yes',
+      error: ''
+    };
+  }
+
+  if (['no', 'n', 'false', '0'].includes(normalized)) {
+    return {
+      value: 'No',
+      error: ''
+    };
+  }
+
+  return {
+    value: 'Yes',
+    error: 'Negotiable is invalid.'
+  };
+}
+
+function normalizeConditionInput(rawValue) {
+  const normalized = normalizeText(rawValue).toLowerCase();
+
+  if (!normalized) {
+    return {
+      value: 'Good',
+      error: ''
+    };
+  }
+
+  const map = {
+    'like new': 'Like New',
+    likenew: 'Like New',
+    new: 'Like New',
+    excellent: 'Like New',
+    good: 'Good',
+    used: 'Good',
+    fair: 'Fair',
+    poor: 'Poor'
+  };
+
+  const matched = map[normalized];
 
   if (!matched) {
     return {
-      value: fallbackValue,
-      error: `${label} is invalid.`
+      value: 'Good',
+      error: 'Condition is invalid.'
+    };
+  }
+
+  return {
+    value: matched,
+    error: ''
+  };
+}
+
+function normalizeDeliveryInput(rawValue) {
+  const normalized = normalizeText(rawValue).toLowerCase();
+
+  if (!normalized) {
+    return {
+      value: 'Meetup',
+      error: ''
+    };
+  }
+
+  const map = {
+    meetup: 'Meetup',
+    meet: 'Meetup',
+    pickup: 'Meetup',
+    'shipping cod': 'Shipping COD',
+    shipping: 'Shipping COD',
+    cod: 'Shipping COD'
+  };
+
+  const matched = map[normalized];
+
+  if (!matched) {
+    return {
+      value: 'Meetup',
+      error: 'Delivery is invalid.'
     };
   }
 
@@ -508,14 +583,9 @@ export function sanitizeItemInput(input) {
   const wardCode = normalizeDurationValue('Ward code', input?.wardCode, 99999999);
   const reasonForSelling = requireText('Reason for selling', rawReason, 5000);
   const price = requireText('Price', input?.price, 80);
-  const negotiable = normalizeSelectValue('Negotiable', input?.negotiable, ['Yes', 'No'], 'Yes');
-  const conditionLabel = normalizeSelectValue(
-    'Condition',
-    rawCondition,
-    ['Like New', 'Good', 'Fair', 'Poor'],
-    'Good'
-  );
-  const delivery = normalizeSelectValue('Delivery', rawDelivery, ['Shipping COD', 'Meetup'], 'Meetup');
+  const negotiable = normalizeNegotiableInput(input?.negotiable);
+  const conditionLabel = normalizeConditionInput(rawCondition);
+  const delivery = normalizeDeliveryInput(rawDelivery);
   const imageUrls = normalizeImageUrls(input?.imageUrls);
   const videoUrls = normalizeVideoUrls(input?.videoUrls);
 

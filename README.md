@@ -64,6 +64,8 @@ npm run dev:backend
 - `POST /api/auth/google`
 - `GET /api/auth/session`
 - `POST /api/auth/logout`
-- `GET /api/feed?limit=10&before=<ISO_DATE>`
-- `POST /api/posts`
-- `DELETE /api/posts/:id`
+- `GET /api/feed?limit=10&keyword=<TEXT>`
+- `GET /api/items`
+- `POST /api/items`
+- `PUT /api/items/:id`
+- `DELETE /api/items/:id`

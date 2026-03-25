@@ -25,6 +25,26 @@ export const ItemFavoriteEntity = new EntitySchema({
       name: 'created_at'
     }
   },
+  relations: {
+    item: {
+      type: 'many-to-one',
+      target: 'Item',
+      joinColumn: {
+        name: 'item_id',
+        referencedColumnName: 'id'
+      },
+      onDelete: 'CASCADE'
+    },
+    user: {
+      type: 'many-to-one',
+      target: 'User',
+      joinColumn: {
+        name: 'user_google_id',
+        referencedColumnName: 'googleId'
+      },
+      onDelete: 'CASCADE'
+    }
+  },
   indices: [
     {
       name: 'UQ_item_favorites_item_user',

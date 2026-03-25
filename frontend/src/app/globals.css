@@ -1,15 +1,15 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Syne:wght@500;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --font-body: 'Manrope', 'Segoe UI', sans-serif;
-  --font-display: 'Syne', 'Trebuchet MS', sans-serif;
+  --font-body: 'Public Sans', 'Segoe UI', sans-serif;
+  --font-display: 'Public Sans', 'Segoe UI', sans-serif;
   --panel-bg: #ffffff;
   --panel-line: #e4e7e9;
-  --panel-shadow: 0 8px 24px rgba(25, 28, 31, 0.12);
+  --panel-shadow: 0 14px 36px rgba(25, 28, 31, 0.12);
   --ink: #191c1f;
   --ink-muted: #5f6c72;
   --brand: #fa8232;
@@ -33,9 +33,9 @@
   body {
     min-height: 100vh;
     background:
-      radial-gradient(circle at 10% 10%, rgba(45, 165, 243, 0.2), transparent 28%),
-      radial-gradient(circle at 90% 0%, rgba(250, 130, 50, 0.15), transparent 24%),
-      linear-gradient(180deg, #edf3fb 0%, #f5f8fc 55%, #f2f4f7 100%);
+      radial-gradient(circle at 8% 8%, rgba(45, 165, 243, 0.15), transparent 28%),
+      radial-gradient(circle at 95% 5%, rgba(250, 130, 50, 0.15), transparent 30%),
+      linear-gradient(180deg, #f6f9fc 0%, #f2f4f5 100%);
     color: var(--ink);
     font-family: var(--font-body);
   }
@@ -67,9 +67,9 @@
 .panel {
   background: var(--panel-bg);
   border: 1px solid var(--panel-line);
-  border-radius: 12px;
+  border-radius: 20px;
   box-shadow: var(--panel-shadow);
-  padding: 18px;
+  padding: 20px;
   width: min(960px, 94vw);
   margin: 24px auto;
 }
@@ -147,6 +147,20 @@
   gap: 8px;
 }
 
+.post-editor-card {
+  border: 1px solid var(--panel-line);
+  border-radius: 16px;
+  padding: 14px;
+  background: linear-gradient(180deg, #fff 0%, #fcfcfd 100%);
+}
+
+.post-editor-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
 .post-form label {
   font-weight: 700;
   font-size: 0.8rem;
@@ -158,11 +172,16 @@
 textarea {
   width: 100%;
   border: 1px solid #d9dce6;
-  border-radius: 10px;
+  border-radius: 14px;
   padding: 10px 12px;
   color: var(--ink);
   font: inherit;
   resize: vertical;
+}
+
+input,
+select {
+  border-radius: 14px;
 }
 
 textarea:focus {
@@ -180,7 +199,7 @@ textarea:focus {
 
 .feed-list li {
   border: 1px solid var(--panel-line);
-  border-radius: 10px;
+  border-radius: 14px;
   padding: 12px;
   display: flex;
   align-items: flex-start;
@@ -198,6 +217,56 @@ textarea:focus {
   margin-top: 6px;
   color: #7e8394;
   font-size: 0.83rem;
+}
+
+.post-preview {
+  border: 1px dashed #d8deea;
+  background: #f9fbff;
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.post-preview-title {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #7c8192;
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+
+.post-empty-hint {
+  font-size: 0.84rem;
+  color: #7d8191;
+}
+
+.post-row {
+  align-items: stretch;
+}
+
+.post-owner-badge {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  border-radius: 12px;
+  display: grid;
+  place-content: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #944024;
+  background: #fff3ee;
+  border: 1px solid #ffd7c5;
+}
+
+.post-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.inline-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .form-foot,
@@ -252,8 +321,8 @@ textarea:focus {
 
 .btn {
   border: 1px solid transparent;
-  border-radius: 8px;
-  padding: 8px 12px;
+  border-radius: 12px;
+  padding: 9px 13px;
   font: inherit;
   font-size: 0.84rem;
   font-weight: 700;
@@ -261,6 +330,13 @@ textarea:focus {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+.soft-card {
+  border: 1px solid var(--panel-line);
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: var(--panel-shadow);
 }
 
 .btn:disabled {
@@ -319,5 +395,10 @@ textarea:focus {
 
   .hero-grid {
     grid-template-columns: 1fr;
+  }
+
+  .post-editor-head {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

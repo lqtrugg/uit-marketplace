@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { formatTime, getErrorMessage, requestJson } from '@/app/_lib/clientApi';
+import PageHero from '@/app/_components/ui/PageHero';
 
 export default function PostPage() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -11,12 +13,13 @@ export default function PostPage() {
   const [loading, setLoading] = useState(true);
   const [posting, setPosting] = useState(false);
   const [deletingPostId, setDeletingPostId] = useState(0);
+  const draftLength = draft.length;
+  const draftTrimmed = draft.trim();
 
-  const canPost = useMemo(() => Boolean(currentUser && draft.trim().length > 0 && !posting), [
-    currentUser,
-    draft,
-    posting
-  ]);
+  const canPost = useMemo(
+    () => Boolean(currentUser && draftTrimmed.length > 0 && !posting),
+    [currentUser, draftTrimmed, posting]
+  );
 
   useEffect(() => {
     let ignore = false;
@@ -111,26 +114,40 @@ export default function PostPage() {
 
   return (
     <section className="panel">
-      <div className="panel-head">
-        <h1>Post Service</h1>
-        <button type="button" className="btn ghost" onClick={refreshFeed}>
-          Refresh
-        </button>
-      </div>
+      <PageHero
+        iconSrc="/clicon/image/svg/mail.svg"
+        title="Post Service"
+        subtitle="Create a quick post, preview it, and manage your own timeline."
+        actions={[
+          { label: 'Refresh', onClick: refreshFeed },
+          { label: 'Open Feed', href: '/feed', primary: true }
+        ]}
+      />
 
-      <p className="subtitle">
-        Create posts as the authenticated user. You can delete only posts authored by your account.
-      </p>
-
-      <div className="hero-grid single-grid">
+      <div className="hero-grid">
         <article>
-          <span>Session state</span>
+          <span>Session</span>
           <strong>{loading ? 'Loading...' : currentUser ? currentUser.email : 'Not authenticated'}</strong>
+        </article>
+        <article>
+          <span>Draft Status</span>
+          <strong>{draftTrimmed ? `${draftLength} chars` : 'Start writing'}</strong>
+        </article>
+        <article>
+          <span>Publish Rule</span>
+          <strong>{currentUser ? 'Authenticated only' : 'Login required'}</strong>
         </article>
       </div>
 
-      <form className="post-form" onSubmit={handleCreatePost}>
-        <label htmlFor="post-content">Write a post</label>
+      <form className="post-form post-editor-card" onSubmit={handleCreatePost}>
+        <div className="post-editor-head">
+          <label htmlFor="post-content">Write a post</label>
+          {!currentUser ? (
+            <Link href="/auth" className="btn secondary">
+              Go To Auth
+            </Link>
+          ) : null}
+        </div>
         <textarea
           id="post-content"
           value={draft}
@@ -140,11 +157,29 @@ export default function PostPage() {
           rows={4}
           disabled={!currentUser || posting}
         />
+        {draftTrimmed ? (
+          <div className="post-preview">
+            <p className="post-preview-title">Preview</p>
+            <p className="post-content">{draftTrimmed}</p>
+          </div>
+        ) : (
+          <p className="post-empty-hint">Tip: keep post short and clear so buyers can scan quickly.</p>
+        )}
         <div className="form-foot">
-          <span>{draft.length}/2000</span>
-          <button type="submit" className="btn primary" disabled={!canPost}>
-            {posting ? 'Posting...' : 'Publish'}
-          </button>
+          <span>{draftLength}/2000</span>
+          <div className="inline-actions">
+            <button
+              type="button"
+              className="btn ghost"
+              onClick={() => setDraft('')}
+              disabled={posting || draftLength === 0}
+            >
+              Clear
+            </button>
+            <button type="submit" className="btn primary" disabled={!canPost}>
+              {posting ? 'Posting...' : 'Publish'}
+            </button>
+          </div>
         </div>
       </form>
 
@@ -159,10 +194,16 @@ export default function PostPage() {
         <ul className="feed-list">
           {posts.map((post) => {
             const isOwner = currentUser?.googleId === post.authorGoogleId;
+            const badge =
+              (post.authorName || post.authorEmail || '?')
+                .trim()
+                .slice(0, 1)
+                .toUpperCase() || '?';
 
             return (
-              <li key={post.id}>
-                <div>
+              <li key={post.id} className="post-row">
+                <div className="post-owner-badge">{badge}</div>
+                <div className="post-body">
                   <p className="post-content">{post.content}</p>
                   <p className="post-meta">
                     {post.authorName} ({post.authorEmail}) | {formatTime(post.createdAt)}

@@ -1,12 +1,15 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
-import { DepositEntity } from '../entities/DepositEntity.js';
+import { ChatEntity } from '../entities/ChatEntity.js';
+import { ConversationEntity } from '../entities/ConversationEntity.js';
 import { HcmWardEntity } from '../entities/HcmWardEntity.js';
 import { ItemEntity } from '../entities/ItemEntity.js';
 import { ItemFavoriteEntity } from '../entities/ItemFavoriteEntity.js';
-import { UserEntity } from '../entities/UserEntity.js';
+import { ItemMediaEntity } from '../entities/ItemMediaEntity.js';
+import { MessageEntity } from '../entities/MessageEntity.js';
+import { OfferEntity } from '../entities/OfferEntity.js';
 import { SessionEntity } from '../entities/SessionEntity.js';
-import { PostEntity } from '../entities/PostEntity.js';
+import { UserEntity } from '../entities/UserEntity.js';
 
 function getConnectionUrl() {
   return process.env.DATABASE_URL || process.env.POSTGRES_URL;
@@ -28,11 +31,14 @@ function getOrCreateDataSource() {
       entities: [
         UserEntity,
         SessionEntity,
-        PostEntity,
         ItemEntity,
         ItemFavoriteEntity,
-        DepositEntity,
-        HcmWardEntity
+        ItemMediaEntity,
+        HcmWardEntity,
+        ChatEntity,
+        ConversationEntity,
+        MessageEntity,
+        OfferEntity
       ],
       synchronize: true,
       logging: false

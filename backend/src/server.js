@@ -3,10 +3,11 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import express from 'express';
 import authRoutes from './routes/authRoutes.js';
+import chatRoutes from './routes/chatRoutes.js';
 import feedRoutes from './routes/feedRoutes.js';
 import itemRoutes from './routes/itemRoutes.js';
 import locationRoutes from './routes/locationRoutes.js';
-import paymentRoutes from './routes/paymentRoutes.js';
+import offerRoutes from './routes/offerRoutes.js';
 import postRoutes from './routes/postRoutes.js';
 import sessionRoutes from './routes/sessionRoutes.js';
 import storageRoutes from './routes/storageRoutes.js';
@@ -45,12 +46,13 @@ app.get('/api/health', (_request, response) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/sessions', sessionRoutes);
+app.use('/api/chats', chatRoutes);
 app.use('/api/feed', feedRoutes);
-app.use('/api/posts', postRoutes);
 app.use('/api/items', itemRoutes);
+app.use('/api/offers', offerRoutes);
+app.use('/api/posts', postRoutes);
 app.use('/api/locations', locationRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/payments', paymentRoutes);
 app.use('/api/uploads', storageRoutes);
 
 app.use((request, response) => {

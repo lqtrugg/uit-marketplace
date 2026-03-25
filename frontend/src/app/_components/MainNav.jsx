@@ -4,7 +4,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
+  clearStoredAuthToken,
   getErrorMessage,
+  logoutCurrentSession,
   requestJson,
   uploadItemMediaFile
 } from '@/app/_lib/clientApi';
@@ -70,7 +72,7 @@ function extractFromWardLevel(addressText) {
   return sliced.replace(/\s*,\s*việt nam$/i, '').trim();
 }
 
-function ActionChip({ label, badge, glyph, onClick }) {
+function ActionChip({ label, badge, glyph, iconSrc, onClick }) {
   return (
     <button
       type="button"
@@ -79,7 +81,7 @@ function ActionChip({ label, badge, glyph, onClick }) {
       aria-label={label}
     >
       <span className="grid size-8 place-content-center rounded-lg bg-white/10 text-[10px] font-extrabold uppercase tracking-[0.15em] text-white/90 transition group-hover:bg-white/20">
-        {glyph}
+        {iconSrc ? <img src={iconSrc} alt="" className="size-4 object-contain" /> : glyph}
       </span>
       <span className="hidden text-xs font-semibold text-white/85 xl:inline">{label}</span>
       {badge ? (
@@ -444,20 +446,29 @@ export default function MainNav() {
     setIsPostModalOpen(false);
   }
 
-  function openReservedPage() {
-    router.push('/reserved');
+  async function handleLogout() {
+    try {
+      await logoutCurrentSession();
+    } catch {
+      clearStoredAuthToken();
+    } finally {
+      setCurrentUser(null);
+      router.replace('/');
+    }
   }
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-[#1f2a3d] bg-[#0A1325] text-white shadow-card">
+      <header className="sticky top-0 z-50 border-b border-[#2e7bc9] bg-gradient-to-r from-[#003b73] via-[#0057a8] to-[#1b6fba] text-white shadow-card">
         <div className="py-4">
           <div className="app-container grid gap-4 lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:items-center">
             <Link href="/home" className="inline-flex items-center gap-3">
-              <span className="grid size-11 place-content-center rounded-2xl bg-gradient-to-br from-clicon-warning to-clicon-primary text-sm font-black tracking-[0.2em] text-clicon-slate">
-                UIT
+              <span className="grid h-11 w-14 place-content-center rounded-2xl border border-[#2e7bc9]/65 bg-gradient-to-br from-[#f4f9ff] to-[#e3f0ff] px-2 shadow-[0_10px_24px_rgba(46,123,201,0.28)]">
+                <img src="/branding/uit-logo.png" alt="UIT logo" className="h-7 w-auto object-contain" />
               </span>
-              <span className="text-2xl font-black uppercase tracking-[0.08em]">Market Pulse</span>
+              <span className="text-2xl font-black uppercase tracking-[0.08em] text-[#f7941d]">
+                Marketplace
+              </span>
             </Link>
 
             <form action="/shop" method="get" role="search" className="flex items-center rounded-xl border border-white/15 bg-white/95 p-1.5 text-clicon-slate">
@@ -476,8 +487,8 @@ export default function MainNav() {
             </form>
 
             <div className="flex items-center justify-end gap-2">
-              <ActionChip label="Reserved" glyph="RSV" onClick={openReservedPage} />
-              <ActionChip label="Post" glyph="PST" onClick={openPostModal} />
+              <ActionChip label="Offers" iconSrc="/clicon/image/svg/mail.svg" onClick={() => router.push('/offers')} />
+              <ActionChip label="Post" iconSrc="/clicon/image/svg/calendar.svg" onClick={openPostModal} />
 
               <div className="group relative">
                 <button
@@ -487,7 +498,7 @@ export default function MainNav() {
                   aria-label="user account menu"
                 >
                   <span className="grid size-8 place-content-center rounded-lg bg-white/10 text-[10px] font-extrabold uppercase tracking-[0.15em] text-white/90">
-                    ID
+                    <img src="/clicon/image/svg/user.svg" alt="" className="size-4 object-contain" />
                   </span>
                   <span className="hidden text-xs font-semibold text-white/85 xl:inline">Account</span>
                 </button>
@@ -512,11 +523,24 @@ export default function MainNav() {
                     Item Dashboard
                   </Link>
                   <Link
-                    href="/reserved"
+                    href="/settings/dashboard"
                     className="block rounded-lg px-3 py-2 text-sm font-medium transition hover:bg-clicon-surface"
                   >
-                    Reserved Items
+                    Offer Dashboard
                   </Link>
+                  <Link
+                    href="/offers"
+                    className="block rounded-lg px-3 py-2 text-sm font-medium transition hover:bg-clicon-surface"
+                  >
+                    My Offers
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="block w-full rounded-lg px-3 py-2 text-left text-sm font-medium text-red-700 transition hover:bg-red-50"
+                  >
+                    Logout
+                  </button>
                 </div>
               </div>
             </div>

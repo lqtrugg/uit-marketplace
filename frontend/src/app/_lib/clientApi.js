@@ -61,6 +61,13 @@ export function clearStoredAuthToken() {
   window.localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
 }
 
+export async function logoutCurrentSession() {
+  await requestJson('/api/sessions/current', {
+    method: 'DELETE'
+  });
+  clearStoredAuthToken();
+}
+
 export async function requestJson(url, options = {}) {
   let response;
   const token = getStoredAuthToken();
@@ -149,55 +156,6 @@ export async function requestSignedUpload({ fileName, contentType, fileSize }) {
   }
 
   return upload;
-}
-
-export async function requestDummyDepositSession({ itemId, amount }) {
-  const payload = await requestJson('/api/payments/deposits', {
-    method: 'POST',
-    body: JSON.stringify({
-      itemId,
-      amount
-    })
-  });
-
-  if (!payload?.deposit?.referenceId || !payload?.deposit?.qrCodeDataUrl) {
-    throw new Error('Dummy payment service returned invalid data.');
-  }
-
-  return payload.deposit;
-}
-
-export async function confirmDummyDepositByReference(referenceId) {
-  const normalizedReferenceId = String(referenceId || '').trim();
-
-  if (!normalizedReferenceId) {
-    throw new Error('Deposit reference id is required.');
-  }
-
-  const payload = await requestJson(
-    `/api/payments/deposits/${encodeURIComponent(normalizedReferenceId)}/confirm`,
-    {
-      method: 'POST'
-    }
-  );
-
-  if (!payload?.deposit?.referenceId) {
-    throw new Error('Dummy payment service returned invalid confirmation data.');
-  }
-
-  return payload.deposit;
-}
-
-export async function listMyDummyDeposits({ limit = 100 } = {}) {
-  const parsedLimit = Number.parseInt(String(limit || ''), 10);
-  const safeLimit = Number.isNaN(parsedLimit) || parsedLimit <= 0 ? 100 : Math.min(parsedLimit, 200);
-  const payload = await requestJson(`/api/payments/deposits/mine?limit=${safeLimit}`);
-
-  if (!Array.isArray(payload?.deposits)) {
-    throw new Error('Dummy payment service returned invalid reserved list.');
-  }
-
-  return payload.deposits;
 }
 
 export async function uploadItemMediaFile(file) {
@@ -348,4 +306,112 @@ export async function updateItemStatus(itemId, status) {
   });
 
   return payload?.item || null;
+}
+
+export async function makeOffer({ itemId, offeredPrice, message }) {
+  const payload = await requestJson('/api/offers', {
+    method: 'POST',
+    body: JSON.stringify({
+      itemId,
+      offeredPrice,
+      message
+    })
+  });
+
+  if (!payload?.offer?.id) {
+    throw new Error('Invalid offer payload.');
+  }
+
+  return payload.offer;
+}
+
+export async function listSellerOffers({ itemId, status, limit = 300 } = {}) {
+  const query = new URLSearchParams();
+  const safeLimit = Number.isFinite(limit) ? Math.max(1, Math.min(Number(limit), 500)) : 300;
+  query.set('limit', String(safeLimit));
+
+  if (itemId !== undefined && itemId !== null && itemId !== '') {
+    query.set('itemId', String(itemId));
+  }
+
+  if (status) {
+    query.set('status', String(status));
+  }
+
+  const payload = await requestJson(`/api/offers/seller?${query.toString()}`);
+  return Array.isArray(payload?.offers) ? payload.offers : [];
+}
+
+export async function acceptOffer(offerId) {
+  const payload = await requestJson(`/api/offers/${offerId}/accept`, {
+    method: 'POST'
+  });
+
+  return {
+    offer: payload?.offer || null,
+    item: payload?.item || null
+  };
+}
+
+export async function listMyOffers({ itemId, status, limit = 300 } = {}) {
+  const query = new URLSearchParams();
+  const safeLimit = Number.isFinite(limit) ? Math.max(1, Math.min(Number(limit), 500)) : 300;
+  query.set('limit', String(safeLimit));
+
+  if (itemId !== undefined && itemId !== null && itemId !== '') {
+    query.set('itemId', String(itemId));
+  }
+
+  if (status) {
+    query.set('status', String(status));
+  }
+
+  const payload = await requestJson(`/api/offers/mine?${query.toString()}`);
+  return Array.isArray(payload?.offers) ? payload.offers : [];
+}
+
+export async function openDirectChat(targetGoogleId) {
+  const normalized = String(targetGoogleId || '').trim();
+
+  if (!normalized) {
+    throw new Error('Target user id is required.');
+  }
+
+  const payload = await requestJson(`/api/chats/direct/${encodeURIComponent(normalized)}`, {
+    method: 'POST'
+  });
+
+  if (!payload?.chat?.id) {
+    throw new Error('Invalid chat payload.');
+  }
+
+  return payload.chat;
+}
+
+export async function listMyChats(limit = 100) {
+  const safeLimit = Number.isFinite(limit) ? Math.max(1, Math.min(Number(limit), 200)) : 100;
+  const payload = await requestJson(`/api/chats?limit=${safeLimit}`);
+  return Array.isArray(payload?.chats) ? payload.chats : [];
+}
+
+export async function listChatMessages(chatId, limit = 200) {
+  const safeLimit = Number.isFinite(limit) ? Math.max(1, Math.min(Number(limit), 300)) : 200;
+  const payload = await requestJson(`/api/chats/${chatId}/messages?limit=${safeLimit}`);
+  return {
+    chat: payload?.chat || null,
+    messages: Array.isArray(payload?.messages) ? payload.messages : []
+  };
+}
+
+export async function sendChatMessage(chatId, content) {
+  const payload = await requestJson(`/api/chats/${chatId}/messages`, {
+    method: 'POST',
+    body: JSON.stringify({ content })
+  });
+
+  if (!payload?.message?.id) {
+    throw new Error('Invalid message payload.');
+  }
+
+  return payload.message;
 }

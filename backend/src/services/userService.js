@@ -1,5 +1,5 @@
 import { getDataSource } from '../core/dataSource.js';
-import { PostEntity } from '../entities/PostEntity.js';
+import { ItemEntity } from '../entities/ItemEntity.js';
 import { UserEntity } from '../entities/UserEntity.js';
 
 function normalizeUser(user) {
@@ -76,17 +76,17 @@ export async function getUserProfileByGoogleId(googleId) {
 
   const dataSource = await getDataSource();
   const userRepo = dataSource.getRepository(UserEntity);
-  const postRepo = dataSource.getRepository(PostEntity);
+  const itemRepo = dataSource.getRepository(ItemEntity);
   const user = await userRepo.findOneBy({ googleId: normalizedGoogleId });
 
   if (!user) {
     return null;
   }
 
-  const postCount = await postRepo.countBy({ authorGoogleId: normalizedGoogleId });
-  const latestPost = await postRepo.findOne({
+  const listingCount = await itemRepo.countBy({ sellerGoogleId: normalizedGoogleId });
+  const latestListing = await itemRepo.findOne({
     where: {
-      authorGoogleId: normalizedGoogleId
+      sellerGoogleId: normalizedGoogleId
     },
     order: {
       createdAt: 'DESC'
@@ -96,8 +96,8 @@ export async function getUserProfileByGoogleId(googleId) {
   return {
     user: normalizeUser(user),
     activity: {
-      postCount,
-      lastPostAt: latestPost ? latestPost.createdAt : null
+      listingCount,
+      lastListingAt: latestListing ? latestListing.createdAt : null
     }
   };
 }
@@ -135,7 +135,7 @@ export async function getTopActiveUsers(limit) {
   const normalizedLimit = normalizeLimit(limit);
   const dataSource = await getDataSource();
   const userRepo = dataSource.getRepository(UserEntity);
-  const postRepo = dataSource.getRepository(PostEntity);
+  const itemRepo = dataSource.getRepository(ItemEntity);
   const candidates = await userRepo.find({
     order: {
       lastLoginAt: 'DESC'
@@ -144,10 +144,10 @@ export async function getTopActiveUsers(limit) {
   });
   const enriched = await Promise.all(
     candidates.map(async (user) => {
-      const postCount = await postRepo.countBy({ authorGoogleId: user.googleId });
-      const latestPost = await postRepo.findOne({
+      const listingCount = await itemRepo.countBy({ sellerGoogleId: user.googleId });
+      const latestListing = await itemRepo.findOne({
         where: {
-          authorGoogleId: user.googleId
+          sellerGoogleId: user.googleId
         },
         order: {
           createdAt: 'DESC'
@@ -156,16 +156,16 @@ export async function getTopActiveUsers(limit) {
 
       return {
         ...normalizeUser(user),
-        postCount,
-        lastPostAt: latestPost ? latestPost.createdAt : null
+        listingCount,
+        lastListingAt: latestListing ? latestListing.createdAt : null
       };
     })
   );
 
   return enriched
     .sort((left, right) => {
-      if (right.postCount !== left.postCount) {
-        return right.postCount - left.postCount;
+      if (right.listingCount !== left.listingCount) {
+        return right.listingCount - left.listingCount;
       }
 
       return new Date(right.lastLoginAt).getTime() - new Date(left.lastLoginAt).getTime();

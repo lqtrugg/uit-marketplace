@@ -24,6 +24,23 @@ export const SessionEntity = new EntitySchema({
       name: 'created_at'
     }
   },
+  relations: {
+    user: {
+      type: 'many-to-one',
+      target: 'User',
+      joinColumn: {
+        name: 'user_google_id',
+        referencedColumnName: 'googleId'
+      },
+      onDelete: 'CASCADE'
+    }
+  },
+  checks: [
+    {
+      name: 'CHK_session_expires_after_created',
+      expression: '"expires_at" > "created_at"'
+    }
+  ],
   indices: [
     {
       name: 'IDX_session_user_google_id',

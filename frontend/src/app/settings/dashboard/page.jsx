@@ -4,11 +4,14 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
+  acceptOffer,
   clearStoredAuthToken,
   formatTime,
   getErrorMessage,
+  listSellerOffers,
   requestJson
 } from '@/app/_lib/clientApi';
+import PageHero from '@/app/_components/ui/PageHero';
 
 const MAX_MEDIA_URLS = 12;
 const HCM_DEFAULT_ZIP_CODE = '700000';
@@ -85,6 +88,8 @@ export default function ItemDashboardPage() {
   const [saving, setSaving] = useState(false);
   const [deletingItemId, setDeletingItemId] = useState(0);
   const [wardOptions, setWardOptions] = useState([]);
+  const [offers, setOffers] = useState([]);
+  const [acceptingOfferId, setAcceptingOfferId] = useState(0);
 
   useEffect(() => {
     let ignore = false;
@@ -103,10 +108,12 @@ export default function ItemDashboardPage() {
           requestJson('/api/items?mine=true&limit=100'),
           requestJson('/api/locations/hcm/wards?limit=2000')
         ]);
+        const sellerOffers = await listSellerOffers({ limit: 500 });
 
         if (!ignore) {
           setItems(Array.isArray(payload.items) ? payload.items : []);
           setWardOptions(Array.isArray(wardPayload?.wards) ? wardPayload.wards : []);
+          setOffers(Array.isArray(sellerOffers) ? sellerOffers : []);
           setStatus({ tone: 'info', text: '' });
         }
       } catch (error) {
@@ -218,7 +225,47 @@ export default function ItemDashboardPage() {
     }
   }
 
+  async function handleAcceptOffer(offer) {
+    if (!offer?.id || acceptingOfferId || saving || deletingItemId) {
+      return;
+    }
+
+    setAcceptingOfferId(offer.id);
+    setStatus({ tone: 'info', text: `Accepting offer #${offer.id}...` });
+
+    try {
+      const payload = await acceptOffer(offer.id);
+      const updatedItem = payload?.item || null;
+
+      if (updatedItem?.id) {
+        setItems((previous) =>
+          previous.map((item) => (item.id === updatedItem.id ? { ...item, ...updatedItem } : item))
+        );
+      }
+
+      const reloadedOffers = await listSellerOffers({ limit: 500 });
+      setOffers(Array.isArray(reloadedOffers) ? reloadedOffers : []);
+      setStatus({ tone: 'success', text: `Offer #${offer.id} accepted. Item closed and hidden from feed.` });
+    } catch (error) {
+      setStatus({ tone: 'error', text: getErrorMessage(error, 'Failed to accept offer.') });
+    } finally {
+      setAcceptingOfferId(0);
+    }
+  }
+
   const editingItem = items.find((item) => item.id === editingItemId) || null;
+  const offersByItemId = offers.reduce((accumulator, offer) => {
+    if (!offer?.itemId) {
+      return accumulator;
+    }
+
+    if (!accumulator[offer.itemId]) {
+      accumulator[offer.itemId] = [];
+    }
+
+    accumulator[offer.itemId].push(offer);
+    return accumulator;
+  }, {});
 
   if (checking) {
     return (
@@ -233,28 +280,15 @@ export default function ItemDashboardPage() {
   return (
     <section className="app-container py-8 sm:py-10">
       <article className="rounded-2xl border border-clicon-border bg-white p-5 shadow-card sm:p-6">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-clicon-border pb-4">
-          <div>
-            <h1 className="text-3xl font-bold text-clicon-slate">My Item Dashboard</h1>
-            <p className="mt-1 text-sm text-clicon-muted">
-              Manage and edit all items you have posted.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Link
-              href="/settings"
-              className="inline-flex rounded-lg border border-clicon-border px-3 py-2 text-sm font-semibold text-clicon-darkBlue transition hover:bg-clicon-surface"
-            >
-              Account Settings
-            </Link>
-            <Link
-              href="/home"
-              className="inline-flex rounded-lg border border-clicon-border px-3 py-2 text-sm font-semibold text-clicon-darkBlue transition hover:bg-clicon-surface"
-            >
-              Marketplace
-            </Link>
-          </div>
-        </div>
+        <PageHero
+          iconSrc="/clicon/image/svg/portfolio.svg"
+          title="My Item Dashboard"
+          subtitle="Manage items and incoming seller-side offers."
+          actions={[
+            { href: '/settings', label: 'Account Settings' },
+            { href: '/home', label: 'Marketplace' }
+          ]}
+        />
 
         {status.text ? <p className={`status status-${status.tone}`}>{status.text}</p> : null}
 
@@ -293,6 +327,48 @@ export default function ItemDashboardPage() {
                     {item.description?.slice(0, 160)}
                     {item.description?.length > 160 ? '...' : ''}
                   </p>
+
+                  <div className="mt-3 rounded-lg border border-clicon-border bg-clicon-surface p-3">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-clicon-muted">
+                      Offers ({offersByItemId[item.id]?.length || 0})
+                    </p>
+                    {offersByItemId[item.id]?.length ? (
+                      <div className="mt-2 space-y-2">
+                        {offersByItemId[item.id].map((offer) => (
+                          <div
+                            key={offer.id}
+                            className="rounded-lg border border-clicon-border bg-white p-2 text-xs text-clicon-muted"
+                          >
+                            <p>
+                              <span className="font-semibold text-clicon-slate">#{offer.id}</span> · Buyer:{' '}
+                              {offer.buyerGoogleId}
+                            </p>
+                            <p>
+                              Offer price:{' '}
+                              <span className="font-semibold text-clicon-secondary">
+                                {offer.offeredPrice?.toLocaleString('vi-VN')} VND
+                              </span>
+                            </p>
+                            {offer.message ? <p>Message: {offer.message}</p> : null}
+                            <p>Status: <span className="capitalize">{offer.status}</span></p>
+                            <p>Created: {formatTime(offer.createdAt)}</p>
+                            {offer.status === 'pending' && item.listingStatus === 'active' ? (
+                              <button
+                                type="button"
+                                onClick={() => handleAcceptOffer(offer)}
+                                disabled={Boolean(acceptingOfferId)}
+                                className="mt-2 inline-flex rounded-lg bg-clicon-secondary px-3 py-1.5 text-xs font-semibold text-white transition hover:brightness-95 disabled:opacity-60"
+                              >
+                                {acceptingOfferId === offer.id ? 'Accepting...' : 'Accept Offer'}
+                              </button>
+                            ) : null}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="mt-1 text-xs text-clicon-muted">No offers yet.</p>
+                    )}
+                  </div>
 
                   <div className="mt-3 flex flex-wrap items-center gap-2">
                     <button

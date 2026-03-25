@@ -1,13 +1,13 @@
 import { Router } from 'express';
-import { getFeed } from '../services/feedService.js';
+import { getItems } from '../services/itemService.js';
 
 const feedRoutes = Router();
 
 feedRoutes.get('/', async (request, response) => {
   try {
-    const payload = await getFeed({
+    const payload = await getItems({
       limit: request.query?.limit,
-      before: request.query?.before
+      keyword: request.query?.keyword
     });
 
     return response.json(payload);

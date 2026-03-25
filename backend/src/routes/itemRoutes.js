@@ -67,8 +67,31 @@ function isItemValidationError(error) {
   return (
     message.includes('Invalid wardCode') ||
     message.includes('Duration must be greater than 0 hour') ||
-    message.includes('Invalid listing status')
+    message.includes('Invalid listing status') ||
+    message.includes('Condition is invalid') ||
+    message.includes('Delivery is invalid') ||
+    message.includes('Negotiable is invalid')
   );
+}
+
+function getForeignKeyViolationMessage(error) {
+  const code = String(error?.code || '');
+
+  if (code !== '23503') {
+    return '';
+  }
+
+  const constraint = String(error?.constraint || '');
+
+  if (constraint.toLowerCase().includes('ward')) {
+    return 'Invalid wardCode. Please select an existing ward.';
+  }
+
+  if (constraint.toLowerCase().includes('seller') || constraint.toLowerCase().includes('user')) {
+    return 'Seller account is invalid or no longer exists. Please login again.';
+  }
+
+  return 'Foreign key validation failed. Please verify related item/user/location data.';
 }
 
 itemRoutes.post('/', async (request, response) => {
@@ -93,6 +116,10 @@ itemRoutes.post('/', async (request, response) => {
     return response.status(201).json({ item });
   } catch (error) {
     console.error('[ITEM_CREATE_ERROR]', error.message);
+    const fkError = getForeignKeyViolationMessage(error);
+    if (fkError) {
+      return response.status(400).json({ error: fkError });
+    }
     if (isItemValidationError(error)) {
       return response.status(400).json({ error: error.message });
     }
@@ -239,6 +266,10 @@ itemRoutes.put('/:id', async (request, response) => {
     return response.json({ item: result.item });
   } catch (error) {
     console.error('[ITEM_UPDATE_ERROR]', error.message);
+    const fkError = getForeignKeyViolationMessage(error);
+    if (fkError) {
+      return response.status(400).json({ error: fkError });
+    }
     if (isItemValidationError(error)) {
       return response.status(400).json({ error: error.message });
     }
